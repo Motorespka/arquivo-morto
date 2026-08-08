@@ -175,9 +175,8 @@ const ui = {
       const spread = folder.querySelector(".book-spread");
 
       try {
-        // 1) Expande a pasta com a capa ainda visivel
-        await this._waitForWidth(folder);
-        // 2) Virada identica a troca de menu (tamanho ja final)
+        // Mesmo tamanho fechado/aberto: so um frame e vira a capa
+        await this._wait(40);
         if (front) front.style.visibility = "hidden";
         folder.classList.add("is-cover-turning");
         sfx("paper");
@@ -204,26 +203,6 @@ const ui = {
   },
   _wait(ms) {
     return new Promise((r) => window.setTimeout(r, ms));
-  },
-  _waitForWidth(el) {
-    const reduce =
-      typeof window.matchMedia === "function" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    return new Promise((resolve) => {
-      let done = false;
-      const finish = () => {
-        if (done) return;
-        done = true;
-        el.removeEventListener("transitionend", onEnd);
-        resolve();
-      };
-      const onEnd = (e) => {
-        if (e.target === el && e.propertyName === "width") finish();
-      };
-      el.addEventListener("transitionend", onEnd);
-      // Um pouco antes do fim da transition (0.9s) para encadear com a virada
-      window.setTimeout(finish, reduce ? 160 : 680);
-    });
   },
   _clearTurningFolders() {
     document

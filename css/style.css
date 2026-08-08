@@ -209,35 +209,34 @@ body.book-leaf-turning,
   overflow: hidden;
 }
 
-/* ——— Título: pasta fechada → abre como pasta ——— */
+/* ——— Título: pasta fechada = mesmo tamanho da aberta ——— */
 #title-folder {
-  transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: none;
 }
 
 #title-folder.is-closed {
-  width: min(86vw, 480px);
+  width: var(--menu-book-w);
 }
 
 #title-folder.is-closed .folder-tab {
-  margin-left: 28px;
+  margin-left: 18%;
 }
 
 #title-folder.is-closed .book-cover {
   min-height: 0;
-  aspect-ratio: 3 / 3.55;
-  max-height: min(68vh, 560px);
+  aspect-ratio: auto;
+  max-height: none;
 }
 
 #title-folder.is-closed .book-spread {
-  position: absolute;
-  inset: 14px 12px 12px;
-  min-height: 0;
-  max-height: none;
-  height: auto;
+  position: relative;
+  inset: auto;
+  height: var(--menu-book-h);
+  min-height: var(--menu-book-h);
+  max-height: var(--menu-book-h);
   opacity: 0;
   pointer-events: none;
-  transform: scaleX(0.92);
-  transform-origin: left center;
+  transform: none;
 }
 
 #title-folder:not(.is-closed) .book-cover {
