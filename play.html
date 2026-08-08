@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jogar — Arquivo Morto</title>
+  <meta name="description" content="Jogue Arquivo Morto no navegador: burocracia caotica no Setor 404." />
+  <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#0e0c0a" />
+  <link rel="canonical" href="https://motorespka.github.io/arquivo-morto/play.html" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%231a1410'/%3E%3Crect x='10' y='14' width='44' height='40' fill='%23d4a84a'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='18' font-family='monospace' fill='%237a1810'%3E404%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Special+Elite&family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="app">
+    <canvas id="game" width="1280" height="720"></canvas>
+
+    <!-- TITLE -->
+    <section id="screen-title" class="screen screen-cabinet">
+      <div class="stamp-bg" aria-hidden="true"></div>
+      <div class="folder folder-book folder-lg is-closed" id="title-folder">
+        <div class="folder-tab">CAPA · 404</div>
+        <div class="book-cover">
+          <button type="button" class="folder-front" id="btn-open-folder" aria-expanded="false">
+            <p class="folder-label">SECRETARIA MUNICIPAL · SETOR 404</p>
+            <h1 class="folder-front-title">Arquivo<br />Morto</h1>
+            <p class="folder-front-tag">Dossiê do estagiário</p>
+            <p class="book-stamp folder-front-stamp">LACRADO</p>
+            <p class="folder-front-hint">Clique para abrir a pasta</p>
+          </button>
+          <div class="book-spread">
+            <div class="book-page book-page-left">
+              <p class="folder-label">SECRETARIA MUNICIPAL</p>
+              <p class="book-dossier">SETOR<br />404</p>
+              <p class="book-stamp">CONFIDENCIAL</p>
+              <p class="book-meta">Protocolo de admissão<br />Estagiário · Arquivo Morto</p>
+            </div>
+            <div class="book-page book-page-right title-panel">
+              <p class="folder-label">FOLHA DE ROSTO</p>
+              <h1>Arquivo<br />Morto</h1>
+              <p class="tagline">O pior cartório do mundo. Você começou hoje.</p>
+              <p class="pitch">
+                Milhões de documentos. Zero organização. Fila infinita.
+                Encontre, empilhe, entregue — e tente não se perder no próprio arquivo.
+              </p>
+              <div class="btn-row">
+                <button id="btn-start" class="btn primary" type="button">Assinar o ponto</button>
+                <button id="btn-howto" class="btn ghost" type="button">Manual do estagiário</button>
+                <button id="btn-mute" class="btn ghost btn-mute" type="button" aria-pressed="false">Som: ligado</button>
+              </div>
+              <p class="hint-keys">WASD mover · E pegar / entregar · R reorganizar · Q soltar</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="screen-howto" class="screen screen-cabinet hidden">
+      <div class="folder folder-book folder-lg">
+        <div class="folder-tab">MANUAL</div>
+        <div class="book-cover">
+          <div class="book-spread">
+            <div class="book-page book-page-left">
+              <h2>Manual do estagiário</h2>
+              <ol class="howto-list">
+                <li><strong>Controles</strong> — WASD mover · <strong>E</strong> pegar na pasta ou entregar no balcão · R reorganizar · Q soltar.</li>
+                <li><strong>Fila</strong> — clientes esperam. No balcão, <strong>E</strong> entrega para qualquer um cujo pedido você tenha (não só o da frente). Borda amarela = tipo pedido na fila.</li>
+                <li><strong>Pilhas</strong> — armários verticais: só o documento do topo sai.</li>
+                <li><strong>Listas</strong> — pressione R num armário para reorganizar (quando desbloqueado).</li>
+                <li><strong>Fotocopiadora</strong> — a partir do turno 2: <strong>E</strong> copia · <strong>R</strong> reabastece (melhora a cada turno; no 4+ enche 2 caixas e metade de outra).</li>
+              </ol>
+            </div>
+            <div class="book-page book-page-right card">
+              <ol class="howto-list howto-list-cont" start="6">
+                <li><strong>Computador</strong> — a partir do turno 3: fusão de 2 arquivos; o timer fica mais rápido a cada turno.</li>
+                <li><strong>Ritmo</strong> — a cada turno o jogo acelera: mais meta e tempo, clientes menos pacientes e mais frequentes, personagem mais rápido.</li>
+                <li><strong>Árvore</strong> — categorias por tipo → estado → setor (fases avançadas).</li>
+                <li><strong>Grafo</strong> — corredores e portas: o caminho mais curto salva a paciência.</li>
+              </ol>
+              <p class="note">Nota: se encontrar um documento com o seu nome, não leia. Ou leia. O arquivo não se importa.</p>
+              <button id="btn-howto-back" class="btn primary" type="button">Entendi. Quero caos.</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LEVEL SELECT -->
+    <section id="screen-levels" class="screen screen-cabinet hidden">
+      <div class="folder folder-book folder-lg">
+        <div class="folder-tab">ESCALAS</div>
+        <div class="book-cover">
+          <div class="book-spread">
+            <div class="book-page book-page-left">
+              <h2>Escalas do arquivo</h2>
+              <p class="note">Abra uma pasta para entrar no turno. Complete fases para desbloquear melhorias.</p>
+              <p class="book-meta">Cada escala é uma folha no dossiê.<br />Quanto melhor a nota, mais o Setor 404 finge que você existe.</p>
+              <button id="btn-levels-back" class="btn ghost" type="button">Voltar</button>
+            </div>
+            <div class="book-page book-page-right card levels-card">
+              <div id="level-list" class="level-list"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HUD -->
+    <div id="hud" class="hidden">
+      <header class="hud-bar">
+        <div class="hud-block">
+          <span class="k">Turno</span>
+          <strong id="hud-level">1</strong>
+        </div>
+        <div class="hud-block timer-block">
+          <span class="k">Prazo</span>
+          <strong id="hud-timer">2:00</strong>
+        </div>
+        <div class="hud-block">
+          <span class="k">Entregues</span>
+          <strong id="hud-served">0/0</strong>
+        </div>
+        <div class="hud-block">
+          <span class="k">Pontos</span>
+          <strong id="hud-score">0</strong>
+        </div>
+        <div class="hud-block hold-block">
+          <span class="k">Mãos</span>
+          <strong id="hud-hold">—</strong>
+        </div>
+        <button id="btn-mute-hud" class="btn-mute-hud" type="button" title="Som" aria-pressed="false">🔊</button>
+      </header>
+
+      <aside id="queue-panel" class="mini-hud left-hud">
+        <p class="panel-title">Clientes</p>
+        <div id="queue-slots" class="mini-hud-list"></div>
+      </aside>
+
+      <aside id="archive-panel" class="mini-hud right-hud">
+        <p class="panel-title">Arquivos</p>
+        <div id="archive-slots" class="mini-hud-list"></div>
+      </aside>
+
+      <div id="toast" class="toast hidden"></div>
+      <div id="dead-taunt" class="dead-taunt hidden" aria-live="polite"></div>
+      <div id="crowd-bubbles" class="crowd-bubbles hidden" aria-hidden="true"></div>
+      <div id="serve-feed" class="serve-feed hidden" aria-live="polite"></div>
+      <div id="event-banner" class="event-banner hidden"></div>
+      <div id="prompt" class="prompt hidden"></div>
+      <div id="mystery" class="mystery hidden">
+        <p class="mystery-stamp">DOCUMENTO CLASSIFICADO</p>
+        <p id="mystery-text"></p>
+        <div id="mystery-actions" class="mystery-actions">
+          <button id="mystery-archive" class="btn primary" type="button">Arquivar mentalmente</button>
+          <button id="mystery-useless" class="btn dead-choice hidden" type="button">I…Inutil?</button>
+        </div>
+        <p id="mystery-hint-archive" class="mystery-hint">Você finge que não viu nada, e continua trabalhando.</p>
+        <p id="mystery-hint-useless" class="mystery-hint hidden">O próximo turno fica com um aspecto mais morto.</p>
+      </div>
+    </div>
+
+    <div id="turn-intro" class="turn-intro hidden" aria-live="polite">
+      <p class="turn-intro-speaker" id="turn-intro-speaker">CHEFE</p>
+      <p class="turn-intro-text" id="turn-intro-text"></p>
+      <button id="turn-intro-reply" class="btn primary" type="button">…</button>
+    </div>
+
+    <!-- PAUSE -->
+    <section id="screen-pause" class="screen overlay screen-cabinet hidden">
+      <div class="folder folder-book">
+        <div class="folder-tab">PAUSA</div>
+        <div class="book-cover">
+          <div class="book-spread">
+            <div class="book-page book-page-left">
+              <p class="folder-label">INTERVALO</p>
+              <p class="book-dossier">NÃO<br />AUTORIZADO</p>
+              <p class="book-stamp">SEM CARIMBO</p>
+            </div>
+            <div class="book-page book-page-right card">
+              <h2>Intervalo (não autorizado)</h2>
+              <div class="btn-row col">
+                <button id="btn-resume" class="btn primary" type="button">Voltar ao caos</button>
+                <button id="btn-quit" class="btn ghost" type="button">Abandonar turno</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESULTS -->
+    <section id="screen-results" class="screen screen-cabinet hidden">
+      <div class="folder folder-book folder-lg">
+        <div class="folder-tab">AVALIAÇÃO</div>
+        <div class="book-cover">
+          <div class="book-spread">
+            <div class="book-page book-page-left results-card">
+              <p class="folder-label" id="results-eyebrow">Avaliação de desempenho</p>
+              <div id="results-grade" class="grade">B</div>
+              <h2 id="results-title">Turno encerrado</h2>
+            </div>
+            <div class="book-page book-page-right card">
+              <ul id="results-stats" class="results-stats"></ul>
+              <p id="results-unlock" class="unlock-note hidden"></p>
+              <div class="btn-row">
+                <button id="btn-retry" class="btn primary" type="button">Repetir turno</button>
+                <button id="btn-next" class="btn accent" type="button">Próxima escala</button>
+                <button id="btn-menu" class="btn ghost" type="button">Menu</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FINAL FALSO (arquivou o relatório na mente) -->
+    <section id="screen-false-end" class="screen screen-false-end hidden" aria-label="Final normal">
+      <div class="false-end-glow" aria-hidden="true"></div>
+      <div class="false-end-scraps" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <div class="false-end-card">
+        <p class="false-end-badge">SETOR 404 · FOLHA DE PAGAMENTO</p>
+        <h2 class="false-end-title">PROTOCOLO<br />CONCLUÍDO!</h2>
+        <p class="false-end-stamp" aria-hidden="true">APROVADO</p>
+        <p class="false-end-body">
+          Após 5 dias de trabalho árduo, você finalmente ganha o seu merecido dinheiro
+          e descanso. Uma pena que foi demitido logo depois de domingo — será que tem
+          a ver com o relatório? <em>PFRRRR bobagem.</em> Aproveite.
+        </p>
+        <p class="false-end-label" id="false-end-label">
+          Final <span id="false-end-normal">normal</span>
+        </p>
+        <div class="btn-row">
+          <button id="btn-false-end-menu" class="btn accent" type="button">Voltar ao menu</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- EPÍLOGO — página de jornal (tela própria) -->
+    <section id="screen-epilogue" class="screen screen-epilogue hidden" aria-label="Edição final">
+      <article class="newspaper" role="document">
+        <header class="np-masthead">
+          <p class="np-edition">Edição extraordinária · Setor 404 · Grátis</p>
+          <h1 class="np-paper-name">O ARQUIVO DIÁRIO</h1>
+          <div class="np-rule" aria-hidden="true"></div>
+          <p class="np-date">Última página · Depois do expediente</p>
+        </header>
+
+        <h2 class="np-headline">MAIS DO QUE UM LAUDO</h2>
+        <p class="np-deck">
+          Capacitismo, pedagogia falha e o preço de chamar alguém de incapaz.
+        </p>
+
+        <div class="np-columns">
+          <p>
+            A depressão é uma doença muito séria. Quando não tratada, pode causar
+            desânimo, falta de interesse e até, no pior dos casos, desejo pela morte.
+          </p>
+          <p>
+            O protagonista possuía um transtorno mental; todos o chamavam de
+            “IDIOTA, AUTISTA, DÉBIL MENTAL” e etc… Mas ele era mais inteligente e
+            mais capaz que todos. Quando descobriu a verdade — o preconceito por
+            trás do elogio falso — ficou desolado. Desenvolveu depressão, e por fim…
+          </p>
+        </div>
+
+        <aside class="np-alert">
+          <p class="np-alert-kicker">Serviço de utilidade pública</p>
+          <p>
+            Não esconda o que te mata. Ligue <strong>188</strong> (CVV) ou busque um
+            psicólogo caso isso piore. O seu bem-estar é o mais importante…
+          </p>
+          <p class="np-alert-care">SE CUIDEM</p>
+        </aside>
+
+        <footer class="np-credits">
+          <p>Jogo feito por: <strong>Christian de Almeida Borges</strong></p>
+          <p>com ajuda de: Cursor IA</p>
+          <p class="np-brand">ARQUIVO MORTO</p>
+        </footer>
+
+        <div class="np-actions">
+          <button id="btn-epilogue-menu" class="btn primary" type="button">Fechar edição</button>
+        </div>
+      </article>
+    </section>
+
+    <!-- Folha que vira DENTRO da pasta (posicionada via JS sobre o livro) -->
+    <div id="page-leaf" class="page-leaf hidden" aria-hidden="true">
+      <div class="page-leaf-inner">
+        <div class="page-leaf-face page-leaf-front">
+          <span class="page-leaf-lines" aria-hidden="true"></span>
+          <span class="page-leaf-curl" aria-hidden="true"></span>
+        </div>
+        <div class="page-leaf-face page-leaf-back">
+          <span class="page-leaf-lines" aria-hidden="true"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRANSIÇÃO TURNO MORTÓRIO -->
+    <div id="dead-transition" class="dead-transition hidden" aria-hidden="true">
+      <div class="dead-trans-noise" id="dead-trans-noise"></div>
+      <div class="dead-trans-vignette"></div>
+      <div class="dead-trans-copy">
+        <p class="dead-trans-stamp" id="dead-trans-stamp"></p>
+        <p class="dead-trans-line" id="dead-trans-line"></p>
+      </div>
+      <p class="dead-trans-skip">E / Espaço / clique — avançar</p>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
