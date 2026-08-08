@@ -864,6 +864,12 @@ body.book-leaf-turning,
   color: #7a4010 !important;
 }
 
+.menu-howto-lock {
+  font-size: 0.78rem;
+  color: #7a1810;
+  font-weight: 700;
+}
+
 @media (max-width: 820px) {
   .folder,
   .folder-lg {
