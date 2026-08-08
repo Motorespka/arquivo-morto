@@ -162,6 +162,12 @@ const ui = {
     if (folder._openTimer) window.clearTimeout(folder._openTimer);
     if (folder._openFlip || this._flipBusy) return false;
 
+    const reduce =
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // Largura (~0.75s) + capa abrindo (~0.7s com delay)
+    const openMs = reduce ? 420 : 1100;
+
     folder._openFlip = true;
     this._flipBusy = true;
     folder.classList.remove("is-opening");
@@ -169,52 +175,19 @@ const ui = {
     folder.classList.add("is-opening");
     folder.classList.remove("is-closed");
     if (btn) btn.setAttribute("aria-expanded", "true");
+    sfx("paper");
 
-    window.requestAnimationFrame(async () => {
-      const front = folder.querySelector(".folder-front");
-      const spread = folder.querySelector(".book-spread");
-
-      try {
-        // 1) Cresce ate o livro; capa fica na metade esquerda (sem esticar)
-        await this._waitForWidth(folder);
-        // 2) Capa abre na lombada como arquivo de verdade
-        if (front) front.style.visibility = "hidden";
-        folder.classList.add("is-cover-turning");
-        sfx("paper");
-        await this._runCoverOpen(spread, front, folder);
-      } finally {
-        if (front) front.style.visibility = "";
-        folder.classList.remove("is-opening", "is-cover-turning");
-        this._clearTurningFolders();
-        folder._openFlip = false;
-        folder._openTimer = null;
-        this._flipBusy = false;
-      }
-    });
+    folder._openTimer = window.setTimeout(() => {
+      folder.classList.remove("is-opening", "is-cover-turning");
+      folder._openFlip = false;
+      folder._openTimer = null;
+      this._flipBusy = false;
+    }, openMs);
 
     return true;
   },
   _wait(ms) {
     return new Promise((r) => window.setTimeout(r, ms));
-  },
-  _waitForWidth(el) {
-    const reduce =
-      typeof window.matchMedia === "function" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    return new Promise((resolve) => {
-      let done = false;
-      const finish = () => {
-        if (done) return;
-        done = true;
-        el.removeEventListener("transitionend", onEnd);
-        resolve();
-      };
-      const onEnd = (e) => {
-        if (e.target === el && e.propertyName === "width") finish();
-      };
-      el.addEventListener("transitionend", onEnd);
-      window.setTimeout(finish, reduce ? 180 : 620);
-    });
   },
   _clearTurningFolders() {
     document
@@ -290,48 +263,7 @@ const ui = {
     leaf.querySelector(".page-leaf-front")?.classList.remove("page-leaf-cover", "page-leaf-verso");
     leaf.querySelector(".page-leaf-back")?.classList.remove("page-leaf-cover", "page-leaf-verso");
   },
-  /** Abre a capa do arquivo em pe na lombada (sem esticar). */
-  async _runCoverOpen(spread, front, folderEl) {
-    const leaf = $("page-leaf");
-    if (!leaf || !spread) return false;
-
-    const reduce =
-      typeof window.matchMedia === "function" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const turnMs = reduce ? 420 : 850;
-
-    document.documentElement.classList.add("book-leaf-turning");
-    document.body.classList.add("book-leaf-turning");
-    $("app")?.classList.add("book-leaf-turning");
-
-    void spread.offsetWidth;
-    // Capa = metade esquerda, dobradica na lombada (direita dessa metade)
-    if (!this._placePageLeaf(spread, -1)) {
-      await this._wait(60);
-      if (!this._placePageLeaf(spread, -1)) {
-        this._hidePageLeaf();
-        return false;
-      }
-    }
-
-    this._fillLeafFace(leaf.querySelector(".page-leaf-front"), front);
-    this._fillLeafFace(leaf.querySelector(".page-leaf-back"), null);
-    leaf.querySelector(".page-leaf-front")?.classList.add("page-leaf-cover");
-    leaf.querySelector(".page-leaf-back")?.classList.add("page-leaf-verso");
-
-    folderEl?.classList.add("is-turning", "is-turning-prev");
-    leaf.classList.remove("hidden", "play", "turn-next", "turn-prev", "turn-cover-open", "settle");
-    leaf.classList.add("turn-cover-open");
-    leaf.setAttribute("aria-hidden", "false");
-    void leaf.offsetWidth;
-    leaf.classList.add("play");
-
-    await this._wait(turnMs);
-    this._clearTurningFolders();
-    this._hidePageLeaf();
-    return true;
-  },
-  /** Mesma animacao usada na troca de menus e na abertura da pasta */
+  /** Mesma animacao usada na troca de menus */
   async _runPageLeafTurn({
     spread,
     fromPage,
