@@ -33,10 +33,21 @@
           </button>
           <div class="book-spread">
             <div class="book-page book-page-left">
-              <p class="folder-label">SECRETARIA MUNICIPAL</p>
-              <p class="book-dossier">SETOR<br />404</p>
-              <p class="book-stamp">CONFIDENCIAL</p>
-              <p class="book-meta">Protocolo de admissão<br />Estagiário · Arquivo Morto</p>
+              <p class="folder-label">COMO JOGAR</p>
+              <h2 class="menu-howto-title">Objetivo</h2>
+              <p class="menu-howto-lead">
+                Atenda a meta de entregas antes do prazo. Clientes na fila perdem a paciência —
+                pegue o documento certo e entregue no balcão.
+              </p>
+              <h2 class="menu-howto-title">Comandos</h2>
+              <ul class="menu-howto-keys">
+                <li><kbd>WASD</kbd> mover</li>
+                <li><kbd>E</kbd> pegar / entregar</li>
+                <li><kbd>R</kbd> reorganizar pilha</li>
+                <li><kbd>Q</kbd> soltar</li>
+                <li><kbd>Esc</kbd> pausar</li>
+              </ul>
+              <p class="book-meta menu-howto-more">Detalhes no Manual do estagiário →</p>
             </div>
             <div class="book-page book-page-right title-panel">
               <p class="folder-label">FOLHA DE ROSTO</p>
@@ -66,19 +77,19 @@
             <div class="book-page book-page-left">
               <h2>Manual do estagiário</h2>
               <ol class="howto-list">
-                <li><strong>Controles</strong> — WASD mover · <strong>E</strong> pegar na pasta ou entregar no balcão · R reorganizar · Q soltar.</li>
-                <li><strong>Fila</strong> — clientes esperam. No balcão, <strong>E</strong> entrega para qualquer um cujo pedido você tenha (não só o da frente). Borda amarela = tipo pedido na fila.</li>
-                <li><strong>Pilhas</strong> — armários verticais: só o documento do topo sai.</li>
-                <li><strong>Listas</strong> — pressione R num armário para reorganizar (quando desbloqueado).</li>
-                <li><strong>Fotocopiadora</strong> — a partir do turno 2: <strong>E</strong> copia · <strong>R</strong> reabastece (melhora a cada turno; no 4+ enche 2 caixas e metade de outra).</li>
+                <li><strong>Controles</strong> — <strong>WASD</strong> mover · <strong>E</strong> pegar num armário/caixa ou entregar no balcão · <strong>R</strong> reorganizar a pilha · <strong>Q</strong> soltar o que estiver na mão · <strong>Esc</strong> pausar.</li>
+                <li><strong>Objetivo</strong> — complete a meta de entregas antes do prazo acabar. Cada cliente quer um tipo de documento.</li>
+                <li><strong>Fila</strong> — no balcão, <strong>E</strong> entrega para quem pedir o que você carrega (não precisa ser só o da frente). Borda amarela no armário = esse tipo está sendo pedido.</li>
+                <li><strong>Pilhas</strong> — armários e caixas são LIFO: só o documento do <em>topo</em> sai. Planeje a ordem.</li>
+                <li><strong>Reorganizar</strong> — com <strong>R</strong> num armário (quando liberado), você rearrange a pilha para pegar o que precisa.</li>
               </ol>
             </div>
             <div class="book-page book-page-right card">
               <ol class="howto-list howto-list-cont" start="6">
-                <li><strong>Computador</strong> — a partir do turno 3: fusão de 2 arquivos; o timer fica mais rápido a cada turno.</li>
-                <li><strong>Ritmo</strong> — a cada turno o jogo acelera: mais meta e tempo, clientes menos pacientes e mais frequentes, personagem mais rápido.</li>
-                <li><strong>Árvore</strong> — categorias por tipo → estado → setor (fases avançadas).</li>
-                <li><strong>Grafo</strong> — corredores e portas: o caminho mais curto salva a paciência.</li>
+                <li><strong>Fotocopiadora</strong> — em escalas seguintes: <strong>E</strong> copia um documento · <strong>R</strong> reabastece o papel. Útil quando a fila pede o que acabou.</li>
+                <li><strong>Computador</strong> — mais adiante: combine dois arquivos numa fusão. Leva um tempo — não fique parado longe da fila.</li>
+                <li><strong>Organização</strong> — setores e categorias ajudam a achar o papel certo mais rápido. Corredores longos gastam a paciência dos clientes.</li>
+                <li><strong>Dica</strong> — atenda quem está prestes a estourar, priorize o caminho curto e não carregue documento errado até o balcão.</li>
               </ol>
               <p class="note">Nota: se encontrar um documento com o seu nome, não leia. Ou leia. O arquivo não se importa.</p>
               <button id="btn-howto-back" class="btn primary" type="button">Entendi. Quero caos.</button>
