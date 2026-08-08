@@ -52,8 +52,13 @@ body.book-leaf-turning,
   z-index: 120;
   pointer-events: none;
   perspective: 2200px;
+  perspective-origin: left center;
   transform-style: preserve-3d;
   overflow: visible;
+}
+
+.page-leaf.turn-prev {
+  perspective-origin: right center;
 }
 
 #game {
@@ -468,6 +473,16 @@ body.book-leaf-turning,
     rgba(255, 255, 255, 0.2) 100%
   );
   opacity: 0.55;
+}
+
+.page-leaf.turn-prev .page-leaf-curl {
+  background: linear-gradient(
+    270deg,
+    rgba(0, 0, 0, 0.22) 0%,
+    transparent 18%,
+    transparent 78%,
+    rgba(255, 255, 255, 0.2) 100%
+  );
 }
 
 .page-leaf.turn-next.play .page-leaf-inner {

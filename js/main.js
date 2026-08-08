@@ -396,21 +396,22 @@ const ui = {
         return;
       }
 
-      // Sempre vira a pagina da direita (mesma animacao estavel nos dois sentidos)
-      const fromPage = from.querySelector(".book-page-right");
-      // Destino montado atras (mesmo lugar) para o verso da folha bater certo
+      // Avancar: folha da direita → pousa na esquerda
+      // Voltar: folha da esquerda → pousa na direita
+      const fromPage =
+        from.querySelector(dir > 0 ? ".book-page-right" : ".book-page-left");
       to.classList.remove("hidden");
       to.style.visibility = "hidden";
       to.style.pointerEvents = "none";
       const toFolder = to.querySelector(".folder");
-      // Verso pousa na esquerda apos 180deg
-      const toPage = to.querySelector(".book-page-left");
+      const toPage =
+        to.querySelector(dir > 0 ? ".book-page-left" : ".book-page-right");
 
       const ok = await this._runPageLeafTurn({
         spread: fromSpread,
         fromPage,
         toPage,
-        dir: 1,
+        dir,
         folderEl: fromFolder,
         onMid: () => {
           from.classList.add("hidden");
@@ -423,7 +424,10 @@ const ui = {
           );
           to.style.visibility = "";
           to.style.pointerEvents = "";
-          toFolder?.classList.add("is-turning", "is-turning-next-land");
+          toFolder?.classList.add(
+            "is-turning",
+            dir > 0 ? "is-turning-next-land" : "is-turning-prev-land"
+          );
           return { folder: toFolder };
         },
       });
