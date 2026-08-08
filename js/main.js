@@ -175,8 +175,9 @@ const ui = {
       const spread = folder.querySelector(".book-spread");
 
       try {
-        // Mesmo tamanho fechado/aberto: so um frame e vira a capa
-        await this._wait(40);
+        // 1) Arquivo em pe → abre ate o tamanho do livro
+        await this._waitForWidth(folder);
+        // 2) Vira a capa como pagina
         if (front) front.style.visibility = "hidden";
         folder.classList.add("is-cover-turning");
         sfx("paper");
@@ -203,6 +204,25 @@ const ui = {
   },
   _wait(ms) {
     return new Promise((r) => window.setTimeout(r, ms));
+  },
+  _waitForWidth(el) {
+    const reduce =
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    return new Promise((resolve) => {
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        el.removeEventListener("transitionend", onEnd);
+        resolve();
+      };
+      const onEnd = (e) => {
+        if (e.target === el && e.propertyName === "width") finish();
+      };
+      el.addEventListener("transitionend", onEnd);
+      window.setTimeout(finish, reduce ? 180 : 620);
+    });
   },
   _clearTurningFolders() {
     document

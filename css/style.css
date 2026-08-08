@@ -16,6 +16,8 @@
   --font-ui: "Source Sans 3", "Segoe UI", sans-serif;
   --menu-book-w: min(96vw, 1100px);
   --menu-book-h: min(78vh, 680px);
+  /* Arquivo fechado em pe: metade da largura, mesma altura */
+  --menu-file-w: min(48vw, 520px);
 }
 
 *,
@@ -209,23 +211,30 @@ body.book-leaf-turning,
   overflow: hidden;
 }
 
-/* ——— Título: pasta fechada = mesmo tamanho da aberta ——— */
+/* ——— Título: fechado = arquivo em pe (metade); aberto = livro ——— */
 #title-folder {
-  transition: none;
+  transition: width 0.75s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 #title-folder.is-closed {
-  width: var(--menu-book-w);
+  width: var(--menu-file-w);
 }
 
 #title-folder.is-closed .folder-tab {
-  margin-left: 18%;
+  margin-left: 22px;
+  min-width: 96px;
 }
 
 #title-folder.is-closed .book-cover {
   min-height: 0;
   aspect-ratio: auto;
   max-height: none;
+  /* Lombada do arquivo em pe */
+  box-shadow:
+    inset 0 2px 0 rgba(255, 230, 160, 0.35),
+    inset 0 -3px 10px rgba(80, 50, 10, 0.22),
+    inset 10px 0 18px rgba(40, 25, 5, 0.18),
+    0 22px 34px rgba(0, 0, 0, 0.55);
 }
 
 #title-folder.is-closed .book-spread {
@@ -237,6 +246,11 @@ body.book-leaf-turning,
   opacity: 0;
   pointer-events: none;
   transform: none;
+}
+
+#title-folder.is-closed .folder-front {
+  /* Capa de arquivo em pe */
+  padding: 28px 22px 22px;
 }
 
 #title-folder:not(.is-closed) .book-cover {
@@ -984,6 +998,7 @@ body.book-leaf-turning,
   :root {
     --menu-book-w: min(96vw, 560px);
     --menu-book-h: min(78vh, 720px);
+    --menu-file-w: min(72vw, 300px);
   }
 
   .folder,
