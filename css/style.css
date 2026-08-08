@@ -61,7 +61,8 @@ body.book-leaf-turning,
   overflow: visible;
 }
 
-.page-leaf.turn-prev {
+.page-leaf.turn-prev,
+.page-leaf.turn-cover-open {
   perspective-origin: right center;
 }
 
@@ -238,6 +239,21 @@ body.book-leaf-turning,
   padding: 28px 22px 22px;
 }
 
+/* Ao abrir: capa fica na metade esquerda (nao estica) enquanto o livro cresce */
+#title-folder.is-opening .folder-front {
+  left: 12px;
+  right: auto;
+  width: calc(50% - 14px);
+  top: 14px;
+  bottom: 12px;
+  padding: 28px 22px 22px;
+}
+
+#title-folder.is-opening .book-spread {
+  opacity: 1;
+  pointer-events: none;
+}
+
 #title-folder:not(.is-closed) .book-cover {
   min-height: 0;
   aspect-ratio: auto;
@@ -396,7 +412,8 @@ body.book-leaf-turning,
   will-change: transform;
 }
 
-.page-leaf.turn-prev .page-leaf-inner {
+.page-leaf.turn-prev .page-leaf-inner,
+.page-leaf.turn-cover-open .page-leaf-inner {
   transform-origin: right center;
 }
 
@@ -515,6 +532,28 @@ body.book-leaf-turning,
 
 .page-leaf.turn-prev.play .page-leaf-inner {
   animation: page-leaf-turn-prev 0.9s cubic-bezier(0.4, 0.05, 0.35, 1) forwards;
+}
+
+/* Capa do arquivo em pe: abre na lombada, sem achatar */
+.page-leaf.turn-cover-open.play .page-leaf-inner {
+  animation: cover-open-swing 0.85s cubic-bezier(0.4, 0.05, 0.35, 1) forwards;
+}
+
+@keyframes cover-open-swing {
+  0% {
+    transform: rotateY(0deg);
+    opacity: 1;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
+  }
+  55% {
+    opacity: 1;
+    box-shadow: 18px 10px 32px rgba(0, 0, 0, 0.4);
+  }
+  100% {
+    transform: rotateY(-168deg);
+    opacity: 0;
+    box-shadow: 0 0 0 transparent;
+  }
 }
 
 @keyframes page-leaf-turn-next {

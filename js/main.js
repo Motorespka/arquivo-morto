@@ -175,21 +175,13 @@ const ui = {
       const spread = folder.querySelector(".book-spread");
 
       try {
-        // 1) Arquivo em pe → abre ate o tamanho do livro
+        // 1) Cresce ate o livro; capa fica na metade esquerda (sem esticar)
         await this._waitForWidth(folder);
-        // 2) Vira a capa como pagina
+        // 2) Capa abre na lombada como arquivo de verdade
         if (front) front.style.visibility = "hidden";
         folder.classList.add("is-cover-turning");
         sfx("paper");
-        await this._runPageLeafTurn({
-          spread,
-          fromPage: front,
-          // Verso pousa no lado esquerdo apos o giro de 180
-          toPage: folder.querySelector(".book-page-left"),
-          dir: 1,
-          folderEl: folder,
-          coverStyle: true,
-        });
+        await this._runCoverOpen(spread, front, folder);
       } finally {
         if (front) front.style.visibility = "";
         folder.classList.remove("is-opening", "is-cover-turning");
@@ -283,7 +275,7 @@ const ui = {
     $("app")?.classList.remove("book-leaf-turning");
     if (!leaf) return;
     leaf.classList.add("hidden");
-    leaf.classList.remove("play", "turn-next", "turn-prev", "settle");
+    leaf.classList.remove("play", "turn-next", "turn-prev", "turn-cover-open", "settle");
     leaf.setAttribute("aria-hidden", "true");
     leaf.style.position = "";
     leaf.style.left = "";
@@ -297,6 +289,47 @@ const ui = {
     leaf.querySelectorAll(".page-leaf-clone").forEach((n) => n.remove());
     leaf.querySelector(".page-leaf-front")?.classList.remove("page-leaf-cover", "page-leaf-verso");
     leaf.querySelector(".page-leaf-back")?.classList.remove("page-leaf-cover", "page-leaf-verso");
+  },
+  /** Abre a capa do arquivo em pe na lombada (sem esticar). */
+  async _runCoverOpen(spread, front, folderEl) {
+    const leaf = $("page-leaf");
+    if (!leaf || !spread) return false;
+
+    const reduce =
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const turnMs = reduce ? 420 : 850;
+
+    document.documentElement.classList.add("book-leaf-turning");
+    document.body.classList.add("book-leaf-turning");
+    $("app")?.classList.add("book-leaf-turning");
+
+    void spread.offsetWidth;
+    // Capa = metade esquerda, dobradica na lombada (direita dessa metade)
+    if (!this._placePageLeaf(spread, -1)) {
+      await this._wait(60);
+      if (!this._placePageLeaf(spread, -1)) {
+        this._hidePageLeaf();
+        return false;
+      }
+    }
+
+    this._fillLeafFace(leaf.querySelector(".page-leaf-front"), front);
+    this._fillLeafFace(leaf.querySelector(".page-leaf-back"), null);
+    leaf.querySelector(".page-leaf-front")?.classList.add("page-leaf-cover");
+    leaf.querySelector(".page-leaf-back")?.classList.add("page-leaf-verso");
+
+    folderEl?.classList.add("is-turning", "is-turning-prev");
+    leaf.classList.remove("hidden", "play", "turn-next", "turn-prev", "turn-cover-open", "settle");
+    leaf.classList.add("turn-cover-open");
+    leaf.setAttribute("aria-hidden", "false");
+    void leaf.offsetWidth;
+    leaf.classList.add("play");
+
+    await this._wait(turnMs);
+    this._clearTurningFolders();
+    this._hidePageLeaf();
+    return true;
   },
   /** Mesma animacao usada na troca de menus e na abertura da pasta */
   async _runPageLeafTurn({
