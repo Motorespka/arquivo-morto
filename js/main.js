@@ -132,6 +132,29 @@ const ui = {
     if (front) front.style.visibility = "";
     if (btn) btn.setAttribute("aria-expanded", "false");
   },
+  /** Abre a pasta do titulo sem animar largura (para viradas de menu). */
+  ensureTitleOpenInstant() {
+    const folder = $("title-folder");
+    const btn = $("btn-open-folder");
+    if (!folder) return;
+    const prev = folder.style.transition;
+    folder.style.transition = "none";
+    folder.classList.remove(
+      "is-closed",
+      "is-opening",
+      "is-cover-turning",
+      "is-turning",
+      "is-turning-next",
+      "is-turning-prev",
+      "is-turning-next-land",
+      "is-turning-prev-land"
+    );
+    const front = folder.querySelector(".folder-front");
+    if (front) front.style.visibility = "";
+    if (btn) btn.setAttribute("aria-expanded", "true");
+    void folder.offsetWidth;
+    folder.style.transition = prev;
+  },
   openTitleFolder() {
     const folder = $("title-folder");
     const btn = $("btn-open-folder");
@@ -373,25 +396,21 @@ const ui = {
         return;
       }
 
-      const fromPage =
-        from.querySelector(dir > 0 ? ".book-page-right" : ".book-page-left");
-
+      // Sempre vira a pagina da direita (mesma animacao estavel nos dois sentidos)
+      const fromPage = from.querySelector(".book-page-right");
       // Destino montado atras (mesmo lugar) para o verso da folha bater certo
       to.classList.remove("hidden");
       to.style.visibility = "hidden";
       to.style.pointerEvents = "none";
       const toFolder = to.querySelector(".folder");
-      // Verso: pagina do LADO ONDE A FOLHA POUSA apos 180deg
-      // Avancar (folha da direita) pousa na esquerda → verso = pagina esquerda
-      // Voltar (folha da esquerda) pousa na direita → verso = pagina direita
-      const toPage =
-        to.querySelector(dir > 0 ? ".book-page-left" : ".book-page-right");
+      // Verso pousa na esquerda apos 180deg
+      const toPage = to.querySelector(".book-page-left");
 
       const ok = await this._runPageLeafTurn({
         spread: fromSpread,
         fromPage,
         toPage,
-        dir,
+        dir: 1,
         folderEl: fromFolder,
         onMid: () => {
           from.classList.add("hidden");
@@ -404,10 +423,7 @@ const ui = {
           );
           to.style.visibility = "";
           to.style.pointerEvents = "";
-          toFolder?.classList.add(
-            "is-turning",
-            dir > 0 ? "is-turning-next-land" : "is-turning-prev-land"
-          );
+          toFolder?.classList.add("is-turning", "is-turning-next-land");
           return { folder: toFolder };
         },
       });
@@ -433,10 +449,7 @@ const ui = {
     await this.flipTo("screen-title", {
       fromId: this._visibleFolderScreen(),
       dir: -1,
-      prepare: () => {
-        $("title-folder")?.classList.remove("is-closed", "is-opening");
-        $("btn-open-folder")?.setAttribute("aria-expanded", "true");
-      },
+      prepare: () => this.ensureTitleOpenInstant(),
     });
   },
   _visibleFolderScreen() {
@@ -938,10 +951,7 @@ function boot() {
     await ui.flipTo("screen-title", {
       fromId: "screen-howto",
       dir: -1,
-      prepare: () => {
-        $("title-folder")?.classList.remove("is-closed", "is-opening");
-        $("btn-open-folder")?.setAttribute("aria-expanded", "true");
-      },
+      prepare: () => ui.ensureTitleOpenInstant(),
     });
   });
   $("btn-levels-back").addEventListener("click", async () => {
@@ -949,7 +959,7 @@ function boot() {
     await ui.flipTo("screen-title", {
       fromId: "screen-levels",
       dir: -1,
-      prepare: () => ui.closeTitleFolder(),
+      prepare: () => ui.ensureTitleOpenInstant(),
     });
   });
   $("btn-mute")?.addEventListener("click", () => {
