@@ -2564,3 +2564,185 @@ body.false-end-mode #turn-intro {
     animation: none;
   }
 }
+
+/* ——— Controles touch (modo celular) ——— */
+html.touch-play,
+html.touch-play body {
+  touch-action: none;
+  overscroll-behavior: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+html.touch-play .screen,
+html.touch-play .folder,
+html.touch-play .btn,
+html.touch-play .touch-controls {
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.touch-controls {
+  position: fixed;
+  z-index: 55;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px));
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent, rgba(10, 8, 6, 0.55) 40%);
+}
+
+.touch-controls.hidden {
+  display: none !important;
+}
+
+.touch-pad,
+.touch-actions {
+  pointer-events: auto;
+}
+
+.touch-pad {
+  display: grid;
+  grid-template-columns: 58px 58px 58px;
+  grid-template-rows: 58px 58px 58px;
+  gap: 6px;
+  grid-template-areas:
+    ". up ."
+    "left center right"
+    ". down .";
+}
+
+.touch-up {
+  grid-area: up;
+}
+.touch-left {
+  grid-area: left;
+}
+.touch-right {
+  grid-area: right;
+}
+.touch-down {
+  grid-area: down;
+}
+.touch-dir-center {
+  grid-area: center;
+  border-radius: 50%;
+  background: rgba(232, 220, 200, 0.08);
+  border: 1px solid rgba(232, 220, 200, 0.12);
+}
+
+.touch-actions {
+  display: grid;
+  grid-template-columns: 64px 64px;
+  grid-template-rows: 64px 64px;
+  gap: 8px;
+}
+
+.touch-btn {
+  appearance: none;
+  margin: 0;
+  border: 2px solid #6e5428;
+  border-radius: 14px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.12), transparent 42%),
+    linear-gradient(180deg, #e8c878 0%, #d4a84a 52%, #c09038 100%);
+  color: #1a1612;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.35);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.touch-btn.is-active,
+.touch-btn:active {
+  transform: translateY(1px) scale(0.97);
+  filter: brightness(1.08);
+}
+
+.touch-dir {
+  width: 58px;
+  height: 58px;
+  border-radius: 12px;
+  font-size: 1.15rem;
+}
+
+.touch-act {
+  width: 64px;
+  height: 64px;
+}
+
+.touch-act-main {
+  grid-column: 1 / -1;
+  width: 100%;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.1), transparent 40%),
+    linear-gradient(180deg, #c45a48 0%, #9a2e22 55%, #7a1810 100%);
+  border-color: #4a100c;
+  color: #f8ebe0;
+  font-size: 1.35rem;
+}
+
+.touch-act-pause {
+  background: rgba(26, 22, 18, 0.82);
+  border-color: rgba(232, 220, 200, 0.28);
+  color: var(--paper);
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+}
+
+html.touch-play .mini-hud {
+  top: auto;
+  bottom: 168px;
+  max-height: 28vh;
+  width: 96px;
+  padding: 5px 4px;
+}
+
+html.touch-play .mini-hud.left-hud {
+  left: 6px;
+}
+
+html.touch-play .mini-hud.right-hud {
+  right: 6px;
+  width: 150px;
+}
+
+html.touch-play .hud-bar {
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  padding: 6px 8px;
+  font-size: 0.78rem;
+}
+
+html.touch-play .prompt {
+  bottom: 170px;
+}
+
+@media (max-width: 420px) {
+  .touch-pad {
+    grid-template-columns: 52px 52px 52px;
+    grid-template-rows: 52px 52px 52px;
+  }
+
+  .touch-dir {
+    width: 52px;
+    height: 52px;
+  }
+
+  .touch-actions {
+    grid-template-columns: 56px 56px;
+    grid-template-rows: 56px 56px;
+  }
+
+  .touch-act {
+    width: 56px;
+    height: 56px;
+  }
+}

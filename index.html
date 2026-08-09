@@ -38,8 +38,8 @@
       <h1 class="hero-brand">Arquivo<br />Morto</h1>
       <p class="hero-line">O pior cartorio do mundo. Voce comecou hoje.</p>
       <div class="hero-actions">
-        <a class="btn-site btn-site-primary" href="play.html">Jogar agora</a>
-        <a class="btn-site btn-site-ghost" href="#sobre">O que e isso</a>
+        <a class="btn-site btn-site-primary" href="play.html">Jogar no PC</a>
+        <a class="btn-site btn-site-mobile" href="play.html?mobile=1">Jogar no celular</a>
       </div>
     </div>
   </header>
@@ -55,11 +55,33 @@
       </p>
     </section>
 
-    <section class="section section-alt" id="controles">
+    <section class="section section-alt" id="celular">
+      <div class="section-inner">
+        <p class="section-label">Modo bolso</p>
+        <h2>Jogue no celular</h2>
+        <p>
+          Abra no navegador do telefone com controles na tela: direcional para
+          andar e botoes E, R e Q para pegar, reorganizar e soltar.
+        </p>
+        <ul class="controls-list controls-list-mobile">
+          <li><kbd class="kbd-pad">▲◀▼▶</kbd> <span>Mover pelo arquivo</span></li>
+          <li><kbd>E</kbd> <span>Pegar ou entregar</span></li>
+          <li><kbd>R</kbd> <span>Reorganizar pilha</span></li>
+          <li><kbd>Q</kbd> <span>Soltar</span></li>
+          <li><kbd>II</kbd> <span>Pausar</span></li>
+        </ul>
+        <p class="mobile-cta">
+          <a class="btn-site btn-site-primary" href="play.html?mobile=1">Abrir no celular</a>
+          <a class="btn-site btn-site-ghost" href="play.html">Prefiro teclado</a>
+        </p>
+      </div>
+    </section>
+
+    <section class="section" id="controles">
       <div class="section-inner">
         <p class="section-label">Manual do estagiario</p>
-        <h2>Controles basicos</h2>
-        <p>Roda no navegador. Teclado recomendado.</p>
+        <h2>Controles no teclado</h2>
+        <p>No computador, use o teclado. No celular, use o modo bolso.</p>
         <ul class="controls-list">
           <li><kbd>WASD</kbd> <span>Mover pelo arquivo</span></li>
           <li><kbd>E</kbd> <span>Pegar ou entregar documento</span></li>
@@ -67,7 +89,7 @@
           <li><kbd>Q</kbd> <span>Soltar o que estiver na mao</span></li>
           <li><kbd>Esc</kbd> <span>Pausar o expediente</span></li>
         </ul>
-        <p style="margin-top: 32px">
+        <p class="mobile-cta">
           <a class="btn-site btn-site-primary" href="play.html">Assinar o ponto</a>
         </p>
       </div>
@@ -77,7 +99,11 @@
   <footer class="site-footer">
     <div class="site-footer-inner">
       <p>Jogo por <strong>Christian de Almeida Borges</strong></p>
-      <p><a href="play.html">Abrir o jogo</a> · gratis no navegador</p>
+      <p>
+        <a href="play.html">PC</a> ·
+        <a href="play.html?mobile=1">Celular</a> ·
+        gratis no navegador
+      </p>
     </div>
   </footer>
 </body>

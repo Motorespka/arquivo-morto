@@ -2,17 +2,20 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jogar — Arquivo Morto</title>
-  <meta name="description" content="Jogue Arquivo Morto no navegador: burocracia caotica no Setor 404." />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Arquivo Morto</title>
+  <meta name="description" content="Jogue Arquivo Morto no navegador ou no celular: burocracia caotica no Setor 404." />
   <meta name="robots" content="index, follow" />
   <meta name="theme-color" content="#0e0c0a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <link rel="canonical" href="https://motorespka.github.io/arquivo-morto/play.html" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%231a1410'/%3E%3Crect x='10' y='14' width='44' height='40' fill='%23d4a84a'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='18' font-family='monospace' fill='%237a1810'%3E404%3C/text%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Special+Elite&family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=20260808b" />
+  <link rel="stylesheet" href="css/style.css?v=20260808c" />
 </head>
 <body>
   <div id="app">
@@ -308,6 +311,23 @@
       </article>
     </section>
 
+    <!-- Controles touch (modo celular) -->
+    <div id="touch-controls" class="touch-controls hidden" aria-hidden="true">
+      <div class="touch-pad" role="group" aria-label="Movimento">
+        <button type="button" class="touch-btn touch-dir touch-up" data-action="up" aria-label="Cima">▲</button>
+        <button type="button" class="touch-btn touch-dir touch-left" data-action="left" aria-label="Esquerda">◀</button>
+        <span class="touch-dir-center" aria-hidden="true"></span>
+        <button type="button" class="touch-btn touch-dir touch-right" data-action="right" aria-label="Direita">▶</button>
+        <button type="button" class="touch-btn touch-dir touch-down" data-action="down" aria-label="Baixo">▼</button>
+      </div>
+      <div class="touch-actions" role="group" aria-label="Acoes">
+        <button type="button" class="touch-btn touch-act touch-act-main" data-action="interact" data-tap="1" aria-label="Pegar ou entregar">E</button>
+        <button type="button" class="touch-btn touch-act" data-action="reorder" data-tap="1" aria-label="Reorganizar">R</button>
+        <button type="button" class="touch-btn touch-act" data-action="drop" data-tap="1" aria-label="Soltar">Q</button>
+        <button type="button" class="touch-btn touch-act touch-act-pause" data-action="pause" data-tap="1" aria-label="Pausar">II</button>
+      </div>
+    </div>
+
     <!-- Folha que vira DENTRO da pasta (posicionada via JS sobre o livro) -->
     <div id="page-leaf" class="page-leaf hidden" aria-hidden="true">
       <div class="page-leaf-inner">
@@ -333,6 +353,22 @@
     </div>
   </div>
 
-  <script type="module" src="js/main.js?v=20260808b"></script>
+  <script>
+    if (window.arquivoMortoDesktop?.isDesktop) {
+      document.documentElement.classList.add("is-desktop-app");
+      document.title = "Arquivo Morto";
+    }
+    (function () {
+      const q = new URLSearchParams(location.search);
+      const forced = q.get("mobile");
+      const coarse =
+        window.matchMedia("(pointer: coarse)").matches ||
+        window.matchMedia("(hover: none) and (max-width: 900px)").matches;
+      const enable =
+        forced === "1" || forced === "true" || (forced !== "0" && coarse && !window.arquivoMortoDesktop?.isDesktop);
+      if (enable) document.documentElement.classList.add("touch-play");
+    })();
+  </script>
+  <script type="module" src="js/main.js?v=20260808c"></script>
 </body>
 </html>

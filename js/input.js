@@ -17,9 +17,29 @@ const MAP = {
   KeyP: "pause",
 };
 
+const HOLD_ACTIONS = new Set(["up", "down", "left", "right"]);
+const TAP_ACTIONS = new Set(["interact", "reorder", "drop", "pause"]);
+
 /** Buffer de códigos digitados (ex.: admin). */
 let cheatBuf = "";
 let cheatStamp = 0;
+
+/** Mantem acao virtual pressionada (D-pad touch). */
+export function setVirtualKey(action, down) {
+  if (!HOLD_ACTIONS.has(action)) return;
+  if (down) keys.add(action);
+  else keys.delete(action);
+}
+
+/** Dispara acao virtual de um toque (E/R/Q/pausa). */
+export function tapVirtualKey(action) {
+  if (!TAP_ACTIONS.has(action)) return;
+  pressed.add(action);
+}
+
+export function clearVirtualKeys() {
+  for (const a of HOLD_ACTIONS) keys.delete(a);
+}
 
 export function bindInput() {
   window.addEventListener("keydown", (e) => {
@@ -46,6 +66,41 @@ export function bindInput() {
     keys.clear();
     pressed.clear();
     cheatBuf = "";
+  });
+}
+
+/** Liga o painel #touch-controls (botoes data-action). */
+export function bindTouchControls(root) {
+  if (!root) return;
+  const onDown = (e) => {
+    const btn = e.target.closest("[data-action]");
+    if (!btn || !root.contains(btn)) return;
+    e.preventDefault();
+    const action = btn.dataset.action;
+    if (btn.dataset.tap === "1") {
+      tapVirtualKey(action);
+      btn.classList.add("is-active");
+      window.setTimeout(() => btn.classList.remove("is-active"), 120);
+      return;
+    }
+    setVirtualKey(action, true);
+    btn.classList.add("is-active");
+    btn.setPointerCapture?.(e.pointerId);
+  };
+  const onUp = (e) => {
+    const btn = e.target.closest("[data-action]");
+    if (!btn || !root.contains(btn)) return;
+    if (btn.dataset.tap === "1") return;
+    setVirtualKey(btn.dataset.action, false);
+    btn.classList.remove("is-active");
+  };
+  root.addEventListener("pointerdown", onDown);
+  root.addEventListener("pointerup", onUp);
+  root.addEventListener("pointercancel", onUp);
+  root.addEventListener("lostpointercapture", onUp);
+  window.addEventListener("blur", () => {
+    clearVirtualKeys();
+    root.querySelectorAll(".is-active").forEach((el) => el.classList.remove("is-active"));
   });
 }
 

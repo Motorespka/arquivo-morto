@@ -1,4 +1,4 @@
-import { bindInput } from "./input.js";
+import { bindInput, bindTouchControls } from "./input.js";
 import { Game, LEVELS, UPGRADES, getProgress } from "./game.js";
 import { loadSprites, getDocSpriteUrl } from "./sprites.js";
 import { getStackQueueHints } from "./data.js";
@@ -95,6 +95,12 @@ const ui = {
   },
   showHud(on) {
     $("hud").classList.toggle("hidden", !on);
+    const touch = $("touch-controls");
+    if (!touch) return;
+    const useTouch = document.documentElement.classList.contains("touch-play");
+    const show = !!(on && useTouch);
+    touch.classList.toggle("hidden", !show);
+    touch.setAttribute("aria-hidden", show ? "false" : "true");
   },
   hideScreens() {
     [
@@ -919,6 +925,7 @@ const ui = {
 function boot() {
   const canvas = $("game");
   bindInput();
+  bindTouchControls($("touch-controls"));
   bindAudioUnlock();
   const game = new Game(canvas, ui);
 
@@ -926,8 +933,9 @@ function boot() {
   ui.syncMuteButton();
 
   function resize() {
-    const w = Math.max(640, window.innerWidth);
-    const h = Math.max(360, window.innerHeight);
+    const touch = document.documentElement.classList.contains("touch-play");
+    const w = Math.max(touch ? 320 : 640, window.innerWidth);
+    const h = Math.max(touch ? 280 : 360, window.innerHeight);
     game.resize(w, h);
     if (game.mode !== "play") {
       const ctx = canvas.getContext("2d");

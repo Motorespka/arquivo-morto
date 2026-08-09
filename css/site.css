@@ -253,6 +253,32 @@ a {
   background: rgba(232, 220, 200, 0.06);
 }
 
+.btn-site-mobile {
+  background: rgba(180, 35, 24, 0.16);
+  color: #f0d4c8;
+  border-color: rgba(180, 35, 24, 0.55);
+}
+
+.btn-site-mobile:hover {
+  transform: translateY(-2px);
+  background: rgba(180, 35, 24, 0.28);
+  border-color: rgba(220, 80, 60, 0.7);
+}
+
+.mobile-cta {
+  margin-top: 32px !important;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 14px;
+  align-items: center;
+  max-width: none !important;
+}
+
+.controls-list-mobile kbd.kbd-pad {
+  min-width: 3.4rem;
+  letter-spacing: 0.02em;
+}
+
 @keyframes cta-glow {
   0%,
   100% {
