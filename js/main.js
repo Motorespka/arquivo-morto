@@ -162,12 +162,6 @@ const ui = {
     if (folder._openTimer) window.clearTimeout(folder._openTimer);
     if (folder._openFlip || this._flipBusy) return false;
 
-    const reduce =
-      typeof window.matchMedia === "function" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    // Largura (~0.75s) + capa abrindo (~0.7s com delay)
-    const openMs = reduce ? 420 : 1100;
-
     folder._openFlip = true;
     this._flipBusy = true;
     folder.classList.remove("is-opening");
@@ -175,19 +169,71 @@ const ui = {
     folder.classList.add("is-opening");
     folder.classList.remove("is-closed");
     if (btn) btn.setAttribute("aria-expanded", "true");
-    sfx("paper");
 
-    folder._openTimer = window.setTimeout(() => {
-      folder.classList.remove("is-opening", "is-cover-turning");
-      folder._openFlip = false;
-      folder._openTimer = null;
-      this._flipBusy = false;
-    }, openMs);
+    window.requestAnimationFrame(async () => {
+      const front = folder.querySelector(".folder-front");
+      const spread = folder.querySelector(".book-spread");
+      try {
+        // 1) Cresce no centro ate o tamanho do livro
+        await this._waitForWidth(folder);
+        // 2) Trava layout final e vira a capa como folha de menu
+        if (front) front.style.visibility = "hidden";
+        folder.classList.add("is-cover-turning");
+        void folder.offsetWidth;
+        await this._wait(40);
+        sfx("paper");
+        await this._runPageLeafTurn({
+          spread,
+          fromPage: front,
+          toPage: folder.querySelector(".book-page-left"),
+          dir: 1,
+          folderEl: folder,
+          coverStyle: true,
+        });
+      } finally {
+        if (front) front.style.visibility = "";
+        folder.classList.remove("is-opening", "is-cover-turning");
+        this._clearTurningFolders();
+        folder._openFlip = false;
+        folder._openTimer = null;
+        this._flipBusy = false;
+        const leaf = $("page-leaf");
+        if (leaf && !leaf.classList.contains("hidden")) this._hidePageLeaf();
+      }
+    });
 
     return true;
   },
   _wait(ms) {
     return new Promise((r) => window.setTimeout(r, ms));
+  },
+  _waitForWidth(el, timeoutMs = 850) {
+    return new Promise((resolve) => {
+      if (!el) {
+        resolve();
+        return;
+      }
+      const reduce =
+        typeof window.matchMedia === "function" &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (reduce) {
+        resolve();
+        return;
+      }
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        el.removeEventListener("transitionend", onEnd);
+        window.clearTimeout(timer);
+        resolve();
+      };
+      const onEnd = (e) => {
+        if (e.target === el && e.propertyName === "width") finish();
+      };
+      el.addEventListener("transitionend", onEnd);
+      const timer = window.setTimeout(finish, timeoutMs);
+    });
   },
   _clearTurningFolders() {
     document

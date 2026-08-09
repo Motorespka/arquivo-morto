@@ -198,11 +198,14 @@ body.book-leaf-turning,
 
 /* ——— Título: fechado = arquivo em pe (metade); aberto = livro ——— */
 #title-folder {
-  transition: width 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+  justify-self: center;
+  margin-inline: auto;
+  transition: width 0.65s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 #title-folder.is-closed {
   width: var(--menu-file-w);
+  overflow: hidden;
 }
 
 #title-folder.is-closed .folder-tab {
@@ -211,9 +214,12 @@ body.book-leaf-turning,
 }
 
 #title-folder.is-closed .book-cover {
-  min-height: 0;
+  position: relative;
+  height: var(--menu-book-h);
+  min-height: var(--menu-book-h);
+  max-height: var(--menu-book-h);
   aspect-ratio: auto;
-  max-height: none;
+  overflow: hidden;
   /* Lombada do arquivo em pe */
   box-shadow:
     inset 0 2px 0 rgba(255, 230, 160, 0.35),
@@ -222,68 +228,88 @@ body.book-leaf-turning,
     0 22px 34px rgba(0, 0, 0, 0.55);
 }
 
-#title-folder.is-closed .book-spread {
-  position: relative;
-  inset: auto;
-  height: var(--menu-book-h);
-  min-height: var(--menu-book-h);
-  max-height: var(--menu-book-h);
-  opacity: 0;
+/*
+  Durante a expansao: paginas no tamanho final, centradas sob o arquivo.
+  A pasta cresce para os dois lados (continua no meio da tela).
+*/
+#title-folder.is-opening:not(.is-cover-turning) .book-spread {
+  position: absolute;
+  left: 50%;
+  top: 14px;
+  width: calc(var(--menu-book-w) - 24px);
+  height: calc(var(--menu-book-h) - 26px);
+  min-height: 0;
+  max-height: none;
+  margin: 0;
   pointer-events: none;
-  transform: none;
+  transform: translateX(-50%);
+  opacity: 1;
+  visibility: visible;
+}
+
+#title-folder.is-closed .book-spread {
+  position: absolute;
+  left: 50%;
+  top: 14px;
+  width: calc(var(--menu-book-w) - 24px);
+  height: calc(var(--menu-book-h) - 26px);
+  min-height: 0;
+  max-height: none;
+  margin: 0;
+  pointer-events: none;
+  transform: translateX(-50%);
+  opacity: 0;
+  visibility: hidden;
 }
 
 #title-folder.is-closed .folder-front {
-  /* Capa de arquivo em pe */
+  left: 12px;
+  right: auto;
+  width: calc(100% - 24px);
+  top: 14px;
+  bottom: 12px;
   padding: 28px 22px 22px;
 }
 
-/* Ao abrir: capa mantem largura do arquivo em pe e gira na lombada */
+/* Expansao: capa permanece no centro do arquivo */
 #title-folder.is-opening {
   overflow: visible;
 }
 
 #title-folder.is-opening .book-cover {
+  position: relative;
+  height: var(--menu-book-h);
+  min-height: var(--menu-book-h);
+  max-height: var(--menu-book-h);
   overflow: visible;
-  perspective: 1600px;
 }
 
-#title-folder.is-opening .folder-front {
-  left: 12px;
+#title-folder.is-opening:not(.is-cover-turning) .folder-front {
+  left: 50%;
   right: auto;
   width: calc(var(--menu-file-w) - 24px);
   top: 14px;
   bottom: 12px;
   padding: 28px 22px 22px;
-  transform-origin: right center;
   pointer-events: none;
-  animation: cover-front-open 0.75s cubic-bezier(0.33, 0.1, 0.25, 1) 0.2s forwards;
-}
-
-#title-folder.is-opening .book-spread {
+  z-index: 10;
+  transform: translateX(-50%);
   opacity: 1;
+}
+
+/* Na virada: layout final do livro (folha mede o spread certo) */
+#title-folder.is-cover-turning .book-spread {
+  position: relative;
+  left: auto;
+  top: auto;
+  width: auto;
+  height: var(--menu-book-h);
+  min-height: var(--menu-book-h);
+  max-height: var(--menu-book-h);
+  transform: none;
+  opacity: 1;
+  visibility: visible;
   pointer-events: none;
-  animation: cover-pages-reveal 0.55s ease 0.15s both;
-}
-
-@keyframes cover-front-open {
-  0% {
-    transform: rotateY(0deg);
-    opacity: 1;
-  }
-  100% {
-    transform: rotateY(-105deg);
-    opacity: 0;
-  }
-}
-
-@keyframes cover-pages-reveal {
-  0% {
-    opacity: 0.35;
-  }
-  100% {
-    opacity: 1;
-  }
 }
 
 #title-folder:not(.is-closed) .book-cover {
@@ -579,14 +605,7 @@ body.book-leaf-turning,
 
 @media (prefers-reduced-motion: reduce) {
   #title-folder {
-    transition-duration: 0.2s;
-  }
-  #title-folder.is-opening .folder-front {
-    animation-duration: 0.35s;
-    animation-delay: 0.05s;
-  }
-  #title-folder.is-opening .book-spread {
-    animation-duration: 0.25s;
+    transition-duration: 0.12s;
   }
   .page-leaf.turn-next.play .page-leaf-inner,
   .page-leaf.turn-prev.play .page-leaf-inner {
