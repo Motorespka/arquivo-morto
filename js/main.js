@@ -1,5 +1,5 @@
 import { bindInput, bindTouchControls } from "./input.js";
-import { Game, LEVELS, UPGRADES, getProgress } from "./game.js";
+import { Game, LEVELS, UPGRADES, getProgress, getDifficulty } from "./game.js";
 import { loadSprites, getDocSpriteUrl } from "./sprites.js";
 import { getStackQueueHints } from "./data.js";
 import { bindAudioUnlock, isMuted, unlockAudio } from "./audio.js";
@@ -743,6 +743,10 @@ const ui = {
           })
           .join(" + ")
       : "vazio";
+    const diffEl = $("hud-diff");
+    if (diffEl) {
+      diffEl.textContent = level.difficultyLabel || getDifficulty(level.difficulty).label;
+    }
 
     if (state.deadAura || state.hellMode) {
       timerEl.classList.add("timer-glitch");
@@ -929,6 +933,7 @@ const ui = {
     $("results-grade").textContent = r.grade;
     $("results-title").textContent = r.title;
     $("results-stats").innerHTML = `
+      <li><span>Dificuldade</span><strong>${r.difficulty || "Normal"}</strong></li>
       <li><span>Entregues</span><strong>${r.served}/${r.goal}</strong></li>
       <li><span>Pontuação</span><strong>${r.score}</strong></li>
       <li><span>Erros / desistências</span><strong>${r.mistakes}</strong></li>
@@ -946,11 +951,22 @@ const ui = {
   },
   renderLevels(game) {
     const progress = getProgress();
+    const diffId = progress.difficulty || "normal";
+    this.renderDifficulty(game, diffId);
+
     const root = $("level-list");
     root.innerHTML = "";
     LEVELS.forEach((lv, i) => {
       const locked = lv.id > progress.unlocked;
-      const best = progress.best[lv.id];
+      const bucket = progress.best[lv.id];
+      let best = null;
+      if (bucket) {
+        if (bucket.grade != null && bucket.easy == null && bucket.normal == null) {
+          best = diffId === "normal" ? bucket : null;
+        } else {
+          best = bucket[diffId] || null;
+        }
+      }
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "level-btn";
@@ -962,7 +978,7 @@ const ui = {
           <div class="title">${locked ? "Lacrada" : lv.title}</div>
           <div class="desc">${locked ? "Complete a escala anterior" : lv.desc}</div>
         </span>
-        <span class="best">${best ? best.grade : locked ? "🔒" : "—"}</span>`;
+        <span class="best">${best ? best.grade : locked ? "—" : "—"}</span>`;
       btn.addEventListener("click", () => {
         unlockAudio();
         sfx("click");
@@ -990,6 +1006,16 @@ const ui = {
         root.appendChild(note);
       }
     }
+  },
+  renderDifficulty(game, diffId) {
+    const active = getDifficulty(diffId);
+    const desc = $("diff-desc");
+    if (desc) desc.textContent = active.desc;
+    document.querySelectorAll(".diff-btn").forEach((btn) => {
+      const on = btn.dataset.diff === active.id;
+      btn.classList.toggle("is-active", on);
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
+    });
   },
 };
 
@@ -1094,6 +1120,14 @@ function boot() {
       dir: -1,
       prepare: () => ui.ensureTitleOpenInstant(),
     });
+  });
+  $("diff-picker")?.addEventListener("click", (e) => {
+    const btn = e.target.closest(".diff-btn");
+    if (!btn) return;
+    unlockAudio();
+    sfx("ui");
+    game.setDifficulty(btn.dataset.diff);
+    ui.renderLevels(game);
   });
   $("btn-mute")?.addEventListener("click", () => {
     unlockAudio();

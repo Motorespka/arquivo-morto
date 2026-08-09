@@ -15,6 +15,10 @@ import {
   TURN_INTROS,
   CHAOS_EVENTS,
   UPGRADES,
+  DIFFICULTIES,
+  DIFFICULTY_ORDER,
+  applyDifficulty,
+  getDifficulty,
   gradeFor,
   rand,
   uid,
@@ -76,6 +80,7 @@ function saveProgress(p) {
 
 export function getProgress() {
   const p = loadProgress();
+  const diff = DIFFICULTIES[p.difficulty] ? p.difficulty : "normal";
   return {
     unlocked: p.unlocked ?? 1,
     best: p.best ?? {},
@@ -85,6 +90,7 @@ export function getProgress() {
     afterDeadHell: !!p.afterDeadHell,
     mindArchive: !!p.mindArchive,
     trueEnd: !!p.trueEnd,
+    difficulty: diff,
   };
 }
 
@@ -98,7 +104,35 @@ function persist(progress) {
     afterDeadHell: !!progress.afterDeadHell,
     mindArchive: !!progress.mindArchive,
     trueEnd: !!progress.trueEnd,
+    difficulty: progress.difficulty || "normal",
   });
+}
+
+function normalizeBestBucket(entry) {
+  if (!entry) return {};
+  if (entry.grade != null && entry.easy == null && entry.normal == null && entry.hard == null) {
+    return { normal: { grade: entry.grade, score: entry.score || 0 } };
+  }
+  return entry;
+}
+
+function getBestForDiff(bestMap, levelId, diffId) {
+  const bucket = normalizeBestBucket(bestMap?.[levelId]);
+  return bucket[diffId] || null;
+}
+
+function setBestForDiff(bestMap, levelId, diffId, grade, score) {
+  const bucket = normalizeBestBucket(bestMap[levelId]);
+  const prev = bucket[diffId];
+  const better =
+    !prev ||
+    gradeRank(grade) > gradeRank(prev.grade) ||
+    score > (prev.score || 0);
+  if (better) {
+    bucket[diffId] = { grade, score };
+    bestMap[levelId] = bucket;
+  }
+  return better;
 }
 
 function makeCustomer(level, upgrades, opts = {}) {
@@ -220,8 +254,11 @@ export class Game {
   }
 
   startLevel(index, opts = {}) {
-    const level = LEVELS[index];
-    if (!level || level.id > this.progress.unlocked) return;
+    const baseLevel = LEVELS[index];
+    if (!baseLevel || baseLevel.id > this.progress.unlocked) return;
+
+    const diffId = this.progress.difficulty || "normal";
+    const level = applyDifficulty(baseLevel, diffId);
 
     this.levelIndex = index;
     const world = createWorld(level, this.progress.upgrades);
@@ -2034,14 +2071,9 @@ export class Game {
       s.score += 100 + over * 50;
     }
 
-    const prev = this.progress.best[level.id];
-    const better =
-      !trueEnd &&
-      (!prev ||
-        gradeRank(result.grade) > gradeRank(prev.grade) ||
-        s.score > (prev.score || 0));
-    if (better) {
-      this.progress.best[level.id] = { grade: result.grade, score: s.score };
+    const diffId = level.difficulty || this.progress.difficulty || "normal";
+    if (!trueEnd) {
+      setBestForDiff(this.progress.best, level.id, diffId, result.grade, s.score);
     }
 
     let unlockMsg = null;
@@ -2093,6 +2125,7 @@ export class Game {
       goal,
       score: s.score,
       mistakes: s.mistakes,
+      difficulty: level.difficultyLabel || getDifficulty(diffId).label,
       unlockMsg,
       hasNext:
         !!this.progress.pendingDeadTurn ||
@@ -2100,6 +2133,13 @@ export class Game {
         (this.progress.unlocked > level.id && level.id < LEVELS.length),
       trueEnd: false,
     });
+  }
+
+  setDifficulty(diffId) {
+    const d = getDifficulty(diffId);
+    this.progress.difficulty = d.id;
+    persist(this.progress);
+    return d;
   }
 
   /** Final “bom” / falso — arquivou o hmm mentalmente. */
@@ -2180,4 +2220,4 @@ function gradeRank(g) {
   return { SSS: 8, SS: 7, S: 6, A: 4, B: 3, C: 2, D: 1 }[g] || 0;
 }
 
-export { LEVELS, UPGRADES };
+export { LEVELS, UPGRADES, DIFFICULTIES, DIFFICULTY_ORDER, getDifficulty };

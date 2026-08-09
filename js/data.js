@@ -514,3 +514,79 @@ export function rand(arr) {
 export function uid(prefix = "id") {
   return `${prefix}_${Math.random().toString(36).slice(2, 9)}`;
 }
+
+/** Dificuldades selecionaveis no menu de escalas. */
+export const DIFFICULTIES = {
+  easy: {
+    id: "easy",
+    label: "Facil",
+    short: "Facil",
+    desc: "Mais tempo, meta menor, fila calma.",
+    duration: 1.28,
+    goal: 0.72,
+    spawnEvery: 1.4,
+    patience: 1.35,
+    drainMul: 0.7,
+    playerSpeed: 1.06,
+    chaosRate: 0.65,
+    maxQueue: 0.85,
+  },
+  normal: {
+    id: "normal",
+    label: "Normal",
+    short: "Normal",
+    desc: "O expediente padrao do Setor 404.",
+    duration: 1,
+    goal: 1,
+    spawnEvery: 1,
+    patience: 1,
+    drainMul: 1,
+    playerSpeed: 1,
+    chaosRate: 1,
+    maxQueue: 1,
+  },
+  hard: {
+    id: "hard",
+    label: "Dificil",
+    short: "Dificil",
+    desc: "Menos tempo, meta maior, clientes impacientes.",
+    duration: 0.82,
+    goal: 1.28,
+    spawnEvery: 0.72,
+    patience: 0.72,
+    drainMul: 1.35,
+    playerSpeed: 1,
+    chaosRate: 1.35,
+    maxQueue: 1.15,
+  },
+};
+
+export const DIFFICULTY_ORDER = ["easy", "normal", "hard"];
+
+export function getDifficulty(id) {
+  return DIFFICULTIES[id] || DIFFICULTIES.normal;
+}
+
+/** Ajusta meta/tempo/fila de um turno pela dificuldade. */
+export function applyDifficulty(level, diffId) {
+  const d = getDifficulty(diffId);
+  const goal = Math.max(1, Math.round(level.goal * d.goal));
+  const maxQueue = Math.max(
+    3,
+    Math.round((level.maxQueue ?? 5) * d.maxQueue)
+  );
+  return {
+    ...level,
+    duration: Math.max(45, Math.round(level.duration * d.duration)),
+    goal,
+    spawnEvery: Math.max(2.5, +(level.spawnEvery * d.spawnEvery).toFixed(2)),
+    patienceMin: Math.max(6, Math.round((level.patienceMin ?? 18) * d.patience)),
+    patienceMax: Math.max(8, Math.round((level.patienceMax ?? 28) * d.patience)),
+    drainMul: Math.max(0.4, +((level.drainMul ?? 1) * d.drainMul).toFixed(2)),
+    playerSpeed: Math.round((level.playerSpeed ?? 170) * d.playerSpeed),
+    chaosRate: Math.max(0.1, +((level.chaosRate ?? 0.4) * d.chaosRate).toFixed(2)),
+    maxQueue,
+    difficulty: d.id,
+    difficultyLabel: d.label,
+  };
+}

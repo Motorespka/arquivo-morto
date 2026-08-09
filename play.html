@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Special+Elite&family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=20260809a" />
+  <link rel="stylesheet" href="css/style.css?v=20260809b" />
 </head>
 <body>
   <div id="app">
@@ -123,7 +123,16 @@
           <div class="book-spread">
             <div class="book-page book-page-left">
               <h2>Escalas do arquivo</h2>
-              <p class="note">Abra uma pasta para entrar no turno. Complete fases para desbloquear melhorias.</p>
+              <p class="note">Escolha a dificuldade e abra uma pasta para entrar no turno.</p>
+              <div class="diff-picker" id="diff-picker" role="group" aria-label="Dificuldade">
+                <p class="diff-picker-label">Dificuldade</p>
+                <div class="diff-picker-row">
+                  <button type="button" class="diff-btn" data-diff="easy">Facil</button>
+                  <button type="button" class="diff-btn" data-diff="normal">Normal</button>
+                  <button type="button" class="diff-btn" data-diff="hard">Dificil</button>
+                </div>
+                <p class="diff-picker-desc" id="diff-desc">O expediente padrao do Setor 404.</p>
+              </div>
               <p class="book-meta">Cada escala é uma folha no dossiê.<br />Quanto melhor a nota, mais o Setor 404 finge que você existe.</p>
               <button id="btn-levels-back" class="btn ghost" type="button">Voltar</button>
             </div>
@@ -153,6 +162,10 @@
         <div class="hud-block">
           <span class="k">Pontos</span>
           <strong id="hud-score">0</strong>
+        </div>
+        <div class="hud-block hud-diff-block">
+          <span class="k">Modo</span>
+          <strong id="hud-diff">Normal</strong>
         </div>
         <div class="hud-block hold-block">
           <span class="k">Na mão</span>
@@ -400,6 +413,6 @@
       if (landscape) document.documentElement.classList.add("touch-landscape");
     })();
   </script>
-  <script type="module" src="js/main.js?v=20260809a"></script>
+  <script type="module" src="js/main.js?v=20260809b"></script>
 </body>
 </html>
