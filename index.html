@@ -40,6 +40,7 @@
       <div class="hero-actions">
         <a class="btn-site btn-site-primary" href="play.html">Jogar no PC</a>
         <a class="btn-site btn-site-mobile" href="play.html?mobile=1">Jogar no celular</a>
+        <a class="btn-site btn-site-landscape" href="play.html?mobile=1&amp;landscape=1">Jogar deitado</a>
       </div>
     </div>
   </header>
@@ -60,8 +61,8 @@
         <p class="section-label">Modo bolso</p>
         <h2>Jogue no celular</h2>
         <p>
-          Abra no navegador do telefone com controles na tela: direcional para
-          andar e botoes E, R e Q para pegar, reorganizar e soltar.
+          Controles na tela: direcional para andar e botoes E, R e Q para pegar,
+          reorganizar e soltar. Escolha vertical (em pe) ou deitado (tela na horizontal).
         </p>
         <ul class="controls-list controls-list-mobile">
           <li><kbd class="kbd-pad">▲◀▼▶</kbd> <span>Mover pelo arquivo</span></li>
@@ -70,8 +71,19 @@
           <li><kbd>Q</kbd> <span>Soltar</span></li>
           <li><kbd>II</kbd> <span>Pausar</span></li>
         </ul>
+        <div class="mobile-modes">
+          <a class="mobile-mode-card" href="play.html?mobile=1">
+            <span class="mobile-mode-icon" aria-hidden="true">▮</span>
+            <strong>Em pe</strong>
+            <span>Tela vertical — pad embaixo</span>
+          </a>
+          <a class="mobile-mode-card mobile-mode-card-accent" href="play.html?mobile=1&amp;landscape=1">
+            <span class="mobile-mode-icon" aria-hidden="true">▬</span>
+            <strong>Deitado</strong>
+            <span>Tela horizontal — controles nas laterais</span>
+          </a>
+        </div>
         <p class="mobile-cta">
-          <a class="btn-site btn-site-primary" href="play.html?mobile=1">Abrir no celular</a>
           <a class="btn-site btn-site-ghost" href="play.html">Prefiro teclado</a>
         </p>
       </div>
@@ -102,6 +114,7 @@
       <p>
         <a href="play.html">PC</a> ·
         <a href="play.html?mobile=1">Celular</a> ·
+        <a href="play.html?mobile=1&amp;landscape=1">Deitado</a> ·
         gratis no navegador
       </p>
     </div>

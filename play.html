@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Special+Elite&family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=20260808d" />
+  <link rel="stylesheet" href="css/style.css?v=20260808e" />
 </head>
 <body>
   <div id="app">
@@ -316,6 +316,20 @@
       </article>
     </section>
 
+    <!-- Aviso: vire o celular (modo deitado) -->
+    <div id="rotate-gate" class="rotate-gate hidden" aria-hidden="true">
+      <div class="rotate-gate-card">
+        <p class="rotate-gate-icon" aria-hidden="true">
+          <span class="rotate-phone"></span>
+        </p>
+        <h2>Deite o celular</h2>
+        <p>Este modo joga com a tela na horizontal — controles nas laterais e mais mapa na tela.</p>
+        <button id="btn-lock-landscape" class="btn primary" type="button">Ativar tela deitada</button>
+        <button id="btn-rotate-anyway" class="btn ghost" type="button">Continuar em pe</button>
+        <p class="rotate-gate-alt"><a href="play.html?mobile=1">Abrir modo vertical</a></p>
+      </div>
+    </div>
+
     <!-- Controles touch (modo celular) -->
     <div id="touch-controls" class="touch-controls hidden" aria-hidden="true">
       <div class="touch-pad" role="group" aria-label="Movimento">
@@ -368,14 +382,22 @@
     (function () {
       const q = new URLSearchParams(location.search);
       const forced = q.get("mobile");
+      const landscape =
+        q.get("landscape") === "1" ||
+        q.get("landscape") === "true" ||
+        q.get("deitado") === "1";
       const coarse =
         window.matchMedia("(pointer: coarse)").matches ||
         window.matchMedia("(hover: none) and (max-width: 900px)").matches;
       const enable =
-        forced === "1" || forced === "true" || (forced !== "0" && coarse && !window.arquivoMortoDesktop?.isDesktop);
+        forced === "1" ||
+        forced === "true" ||
+        landscape ||
+        (forced !== "0" && coarse && !window.arquivoMortoDesktop?.isDesktop);
       if (enable) document.documentElement.classList.add("touch-play");
+      if (landscape) document.documentElement.classList.add("touch-landscape");
     })();
   </script>
-  <script type="module" src="js/main.js?v=20260808d"></script>
+  <script type="module" src="js/main.js?v=20260808e"></script>
 </body>
 </html>

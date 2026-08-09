@@ -2590,6 +2590,8 @@ body.false-end-mode #turn-intro {
 /* ——— Controles touch (modo celular) ——— */
 html.touch-play {
   --touch-chrome: 188px;
+  --touch-side-left: 128px;
+  --touch-side-right: 140px;
   --menu-book-w: min(96vw, 520px);
   --menu-book-h: min(62dvh, 480px);
   --menu-file-w: min(48vw, 240px);
@@ -2926,33 +2928,215 @@ html.touch-play .grade {
   }
 }
 
-@media (orientation: landscape) and (max-height: 480px) {
-  html.touch-play {
-    --touch-chrome: 132px;
-    --menu-book-h: min(78dvh, 360px);
+/* ——— Modo deitado: controles nas laterais ——— */
+.rotate-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    linear-gradient(180deg, rgba(12, 10, 8, 0.92), rgba(10, 8, 6, 0.96)),
+    repeating-linear-gradient(90deg, #2a1e16 0 14px, #241a12 14px 28px);
+}
+
+.rotate-gate.hidden {
+  display: none !important;
+}
+
+.rotate-gate-card {
+  width: min(92vw, 360px);
+  padding: 28px 22px;
+  text-align: center;
+  color: #1a1612;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.12), transparent 40%),
+    linear-gradient(180deg, #e8c878 0%, #d4a84a 52%, #c09038 100%);
+  border: 2px solid #6e5428;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+}
+
+.rotate-gate-card h2 {
+  margin: 0 0 10px;
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  font-weight: 400;
+}
+
+.rotate-gate-card p {
+  margin: 0 0 18px;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: rgba(26, 22, 18, 0.78);
+}
+
+.rotate-gate-card .btn {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.rotate-gate-alt {
+  margin: 12px 0 0 !important;
+  font-size: 0.85rem !important;
+}
+
+.rotate-gate-alt a {
+  color: #5a2010;
+  font-weight: 700;
+}
+
+.rotate-gate-icon {
+  display: grid;
+  place-items: center;
+  margin: 0 0 14px !important;
+  min-height: 64px;
+}
+
+.rotate-phone {
+  width: 34px;
+  height: 54px;
+  border: 3px solid #5a2010;
+  border-radius: 6px;
+  position: relative;
+  animation: rotate-phone-tip 1.6s ease-in-out infinite;
+  transform-origin: center;
+}
+
+.rotate-phone::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 6px;
+  width: 8px;
+  height: 3px;
+  margin-left: -4px;
+  background: #5a2010;
+  border-radius: 2px;
+}
+
+@keyframes rotate-phone-tip {
+  0%,
+  30% {
+    transform: rotate(0deg);
+  }
+  55%,
+  85% {
+    transform: rotate(90deg);
+  }
+  100% {
+    transform: rotate(90deg);
+  }
+}
+
+html.touch-play.is-landscape {
+  --touch-chrome: 0px;
+  --touch-side-left: 128px;
+  --touch-side-right: 148px;
+  --menu-book-h: min(84dvh, 420px);
+  --menu-book-w: min(92vw, 720px);
+}
+
+html.touch-play.is-landscape #game {
+  max-height: none;
+}
+
+html.touch-play.is-landscape .touch-controls {
+  height: auto;
+  inset: 0;
+  padding: 0;
+  background: none;
+  align-items: stretch;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+html.touch-play.is-landscape .touch-pad {
+  position: absolute;
+  left: max(8px, env(safe-area-inset-left, 0px));
+  bottom: max(12px, env(safe-area-inset-bottom, 0px));
+  top: auto;
+  grid-template-columns: 48px 48px 48px;
+  grid-template-rows: 48px 48px 48px;
+  gap: 4px;
+}
+
+html.touch-play.is-landscape .touch-actions {
+  position: absolute;
+  right: max(8px, env(safe-area-inset-right, 0px));
+  bottom: max(12px, env(safe-area-inset-bottom, 0px));
+  top: auto;
+}
+
+html.touch-play.is-landscape .touch-dir,
+html.touch-play.is-landscape .touch-act {
+  width: 48px;
+  height: 48px;
+}
+
+html.touch-play.is-landscape .touch-act-main {
+  width: 156px;
+  height: 52px;
+  font-size: 1.2rem;
+}
+
+html.touch-play.is-landscape .mini-hud {
+  bottom: 12px;
+  max-height: 42vh;
+}
+
+html.touch-play.is-landscape .mini-hud.left-hud {
+  left: calc(var(--touch-side-left) + 4px);
+}
+
+html.touch-play.is-landscape .mini-hud.right-hud {
+  right: calc(var(--touch-side-right) + 4px);
+  width: 140px;
+}
+
+html.touch-play.is-landscape .toast,
+html.touch-play.is-landscape .prompt,
+html.touch-play.is-landscape .turn-intro {
+  bottom: 16px;
+  left: 50%;
+  max-width: min(52vw, 420px);
+}
+
+html.touch-play.is-landscape .serve-feed {
+  bottom: 56px;
+  right: calc(var(--touch-side-right) + 8px);
+}
+
+html.touch-play.is-landscape .hud-bar {
+  max-width: calc(100% - var(--touch-side-left) - var(--touch-side-right) - 16px);
+}
+
+@media (orientation: landscape) and (max-height: 420px) {
+  html.touch-play.is-landscape {
+    --touch-side-left: 118px;
+    --touch-side-right: 132px;
   }
 
-  .touch-pad {
+  html.touch-play.is-landscape .touch-pad {
     grid-template-columns: 44px 44px 44px;
     grid-template-rows: 44px 44px 44px;
-    gap: 3px;
   }
 
-  .touch-dir,
-  .touch-act {
+  html.touch-play.is-landscape .touch-dir,
+  html.touch-play.is-landscape .touch-act {
     width: 44px;
     height: 44px;
-    border-radius: 10px;
   }
 
-  .touch-act-main {
+  html.touch-play.is-landscape .touch-act-main {
     width: 140px;
-    height: 48px;
-    font-size: 1.1rem;
+    height: 46px;
   }
+}
 
-  html.touch-play .mini-hud {
-    max-height: 18vh;
-    bottom: calc(var(--touch-chrome) + 4px);
+@media (prefers-reduced-motion: reduce) {
+  .rotate-phone {
+    animation: none;
+    transform: rotate(90deg);
   }
 }

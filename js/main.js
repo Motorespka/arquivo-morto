@@ -219,8 +219,18 @@ const ui = {
   _isTouchPlay() {
     return document.documentElement.classList.contains("touch-play");
   },
+  _prefersLandscape() {
+    return document.documentElement.classList.contains("touch-landscape");
+  },
+  _isLandscapeNow() {
+    return (
+      window.matchMedia("(orientation: landscape)").matches ||
+      window.innerWidth > window.innerHeight
+    );
+  },
   _touchChromePx() {
     if (!this._isTouchPlay()) return 0;
+    if (this._isLandscapeNow()) return 0;
     const tc = $("touch-controls");
     if (!tc || tc.classList.contains("hidden")) return 0;
     const h = tc.getBoundingClientRect().height;
@@ -228,6 +238,51 @@ const ui = {
     const css = getComputedStyle(document.documentElement).getPropertyValue("--touch-chrome");
     const n = parseFloat(css);
     return Number.isFinite(n) ? Math.ceil(n) : 188;
+  },
+  /** Espaco reservado aos controles (embaixo no vertical, laterais no deitado). */
+  _touchInsets() {
+    if (!this._isTouchPlay()) return { top: 0, right: 0, bottom: 0, left: 0 };
+    const tc = $("touch-controls");
+    if (!tc || tc.classList.contains("hidden")) {
+      return { top: 0, right: 0, bottom: 0, left: 0 };
+    }
+    if (this._isLandscapeNow()) {
+      const cssL = getComputedStyle(document.documentElement).getPropertyValue("--touch-side-left");
+      const cssR = getComputedStyle(document.documentElement).getPropertyValue("--touch-side-right");
+      const left = parseFloat(cssL);
+      const right = parseFloat(cssR);
+      return {
+        top: 0,
+        bottom: 0,
+        left: Number.isFinite(left) ? Math.ceil(left) : 128,
+        right: Number.isFinite(right) ? Math.ceil(right) : 140,
+      };
+    }
+    return { top: 0, right: 0, bottom: this._touchChromePx(), left: 0 };
+  },
+  syncLandscapeUi() {
+    const root = document.documentElement;
+    const landscape = this._isLandscapeNow();
+    root.classList.toggle("is-landscape", landscape);
+
+    const gate = $("rotate-gate");
+    if (!gate) return;
+    const prefer = this._prefersLandscape();
+    const allowPortrait = root.classList.contains("allow-portrait");
+    const showGate = prefer && !landscape && !allowPortrait;
+    gate.classList.toggle("hidden", !showGate);
+    gate.setAttribute("aria-hidden", showGate ? "false" : "true");
+  },
+  async tryLockLandscape() {
+    try {
+      if (screen.orientation?.lock) {
+        await screen.orientation.lock("landscape");
+        return true;
+      }
+    } catch {
+      /* navegador pode bloquear sem fullscreen / gesto */
+    }
+    return false;
   },
   _waitForWidth(el, timeoutMs) {
     return new Promise((resolve) => {
@@ -951,18 +1006,19 @@ function boot() {
   ui.syncMuteButton();
 
   function resize() {
+    ui.syncLandscapeUi();
     const touch = ui._isTouchPlay();
-    const chrome = ui._touchChromePx();
+    const inset = ui._touchInsets();
     const vw = window.visualViewport?.width || window.innerWidth;
     const vh = window.visualViewport?.height || window.innerHeight;
-    const w = Math.max(touch ? 320 : 640, Math.round(vw));
-    const h = Math.max(touch ? 240 : 360, Math.round(vh - chrome));
+    const w = Math.max(touch ? 280 : 640, Math.round(vw - inset.left - inset.right));
+    const h = Math.max(touch ? 200 : 360, Math.round(vh - inset.top - inset.bottom));
     game.resize(w, h);
     canvas.style.width = `${w}px`;
     canvas.style.height = `${h}px`;
     if (touch) {
-      canvas.style.top = "0";
-      canvas.style.left = "0";
+      canvas.style.top = `${inset.top}px`;
+      canvas.style.left = `${inset.left}px`;
       canvas.style.right = "auto";
       canvas.style.bottom = "auto";
     } else {
@@ -983,18 +1039,39 @@ function boot() {
     }
   }
   window.addEventListener("resize", resize);
+  window.addEventListener("orientationchange", () => {
+    window.setTimeout(resize, 120);
+  });
   window.visualViewport?.addEventListener("resize", resize);
   window.visualViewport?.addEventListener("scroll", resize);
   resize();
 
+  $("btn-lock-landscape")?.addEventListener("click", async () => {
+    unlockAudio();
+    sfx("click");
+    const ok = await ui.tryLockLandscape();
+    if (!ok) ui.toast("Vire o celular na horizontal");
+    ui.syncLandscapeUi();
+    resize();
+  });
+  $("btn-rotate-anyway")?.addEventListener("click", () => {
+    unlockAudio();
+    sfx("ui");
+    document.documentElement.classList.add("allow-portrait");
+    ui.syncLandscapeUi();
+    resize();
+  });
+
   $("btn-open-folder")?.addEventListener("click", () => {
     unlockAudio();
     sfx("openFolder");
+    if (ui._prefersLandscape()) ui.tryLockLandscape();
     ui.openTitleFolder();
   });
   $("btn-start").addEventListener("click", async () => {
     unlockAudio();
     sfx("click");
+    if (ui._prefersLandscape()) await ui.tryLockLandscape();
     await ui.flipTo("screen-levels", {
       fromId: "screen-title",
       dir: 1,
