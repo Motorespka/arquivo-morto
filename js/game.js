@@ -87,6 +87,7 @@ export function getProgress() {
     upgrades: new Set(p.upgrades ?? []),
     mysterySeen: p.mysterySeen ?? 0,
     pendingDeadTurn: !!p.pendingDeadTurn,
+    pendingDeadLevelId: p.pendingDeadLevelId ?? null,
     afterDeadHell: !!p.afterDeadHell,
     mindArchive: !!p.mindArchive,
     trueEnd: !!p.trueEnd,
@@ -101,6 +102,7 @@ function persist(progress) {
     upgrades: [...progress.upgrades],
     mysterySeen: progress.mysterySeen,
     pendingDeadTurn: !!progress.pendingDeadTurn,
+    pendingDeadLevelId: progress.pendingDeadLevelId ?? null,
     afterDeadHell: !!progress.afterDeadHell,
     mindArchive: !!progress.mindArchive,
     trueEnd: !!progress.trueEnd,
@@ -108,7 +110,7 @@ function persist(progress) {
   });
 }
 
-function normalizeBestBucket(entry) {
+export function normalizeBestBucket(entry) {
   if (!entry) return {};
   if (entry.grade != null && entry.easy == null && entry.normal == null && entry.hard == null) {
     return { normal: { grade: entry.grade, score: entry.score || 0 } };
@@ -116,7 +118,7 @@ function normalizeBestBucket(entry) {
   return entry;
 }
 
-function getBestForDiff(bestMap, levelId, diffId) {
+export function getBestForDiff(bestMap, levelId, diffId) {
   const bucket = normalizeBestBucket(bestMap?.[levelId]);
   return bucket[diffId] || null;
 }
@@ -124,10 +126,15 @@ function getBestForDiff(bestMap, levelId, diffId) {
 function setBestForDiff(bestMap, levelId, diffId, grade, score) {
   const bucket = normalizeBestBucket(bestMap[levelId]);
   const prev = bucket[diffId];
-  const better =
-    !prev ||
-    gradeRank(grade) > gradeRank(prev.grade) ||
-    score > (prev.score || 0);
+  if (!prev) {
+    bucket[diffId] = { grade, score };
+    bestMap[levelId] = bucket;
+    return true;
+  }
+  const gNew = gradeRank(grade);
+  const gOld = gradeRank(prev.grade);
+  // Nota manda; score so desempata a mesma nota
+  const better = gNew > gOld || (gNew === gOld && score > (prev.score || 0));
   if (better) {
     bucket[diffId] = { grade, score };
     bestMap[levelId] = bucket;
@@ -268,8 +275,16 @@ export class Game {
     const special = opts.special || null;
     const deadAura = special === "dead";
     const hellMode = special === "hell";
+
+    // Entrada normal pelo menu: limpa flags de historia que sobraram
+    if (!special) {
+      this._endedAsDead = false;
+      this._retrySpecial = null;
+    }
+
     if (deadAura) {
       this.progress.pendingDeadTurn = false;
+      this.progress.pendingDeadLevelId = null;
       persist(this.progress);
     }
     this._runSpecial = deadAura ? "dead" : hellMode ? "hell" : null;
@@ -1470,7 +1485,7 @@ export class Game {
       sfx("fusion");
       sfx("ready");
       pc.readyPulse = 1.1;
-      s.screenFlash = Math.max(s.screenFlash, 0.16);
+      if (this.state) this.state.screenFlash = Math.max(this.state.screenFlash || 0, 0.16);
       this.toast(`Fusão pronta: ${pc.output.name}`);
     }
   }
@@ -1987,9 +2002,16 @@ export class Game {
    */
   continueStory() {
     if (this.progress.pendingDeadTurn) {
-      const next = this.levelIndex + 1;
-      if (next >= LEVELS.length) {
-        this.toast("Sem próximo turno para o protocolo.");
+      let next = this.levelIndex + 1;
+      if (this.progress.pendingDeadLevelId != null) {
+        const byId = LEVELS.findIndex((l) => l.id === this.progress.pendingDeadLevelId);
+        if (byId >= 0) next = byId;
+      }
+      if (next < 0 || next >= LEVELS.length) {
+        this.progress.pendingDeadTurn = false;
+        this.progress.pendingDeadLevelId = null;
+        persist(this.progress);
+        this.toast("Sem proximo turno para o protocolo.");
         return false;
       }
       if (LEVELS[next].id > this.progress.unlocked) {
@@ -2026,15 +2048,17 @@ export class Game {
   closeMystery(choice = "archive") {
     if (this._mysteryChoices) {
       if (choice === "useless") {
-        // Só o papel amarelo (hmm) com escolha “I…Inutil?” agenda o turno morto
+        // So o papel amarelo (hmm) com escolha "I…Inutil?" agenda o turno morto
+        const fromId = this.state?.world?.level?.id ?? LEVELS[this.levelIndex]?.id ?? 1;
         this.progress.pendingDeadTurn = true;
+        this.progress.pendingDeadLevelId = fromId + 1;
         this.progress.mindArchive = false;
         persist(this.progress);
-        this.toast("I… inutil? O próximo turno não será o mesmo.");
+        this.toast("I… inutil? O proximo turno nao sera o mesmo.");
       } else {
         this.progress.mindArchive = true;
         persist(this.progress);
-        this.toast("Você finge que não viu nada.");
+        this.toast("Voce finge que nao viu nada.");
       }
     }
     this._mysteryChoices = false;
@@ -2112,6 +2136,7 @@ export class Game {
 
     this.mode = "results";
     this.ui.clearHellFeeds();
+    this.ui.showHud(false);
     setAmbience(null);
     sfx("results");
     this.ui.showResults({
@@ -2194,6 +2219,8 @@ export class Game {
     this._mysteryChoices = false;
     this._deadIntroDone = true;
     this._deadOutroDone = true;
+    this._endedAsDead = false;
+    this._retrySpecial = null;
     setAmbience(null);
     document.body.classList.remove("dead-aura", "hell-mode", "epilogue-mode", "false-end-mode");
     this.ui.hideEpilogue?.();

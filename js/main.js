@@ -1,5 +1,5 @@
 import { bindInput, bindTouchControls } from "./input.js";
-import { Game, LEVELS, UPGRADES, getProgress, getDifficulty } from "./game.js";
+import { Game, LEVELS, UPGRADES, getProgress, getDifficulty, getBestForDiff } from "./game.js";
 import { loadSprites, getDocSpriteUrl } from "./sprites.js";
 import { getStackQueueHints } from "./data.js";
 import { bindAudioUnlock, isMuted, unlockAudio } from "./audio.js";
@@ -554,6 +554,16 @@ const ui = {
   },
   showPause(on) {
     $("screen-pause").classList.toggle("hidden", !on);
+    // No celular o pad fica acima da pausa — esconde enquanto pausado
+    if (this._isTouchPlay()) {
+      const touch = $("touch-controls");
+      const hudOn = !$("hud")?.classList.contains("hidden");
+      const showTouch = !on && hudOn;
+      if (touch) {
+        touch.classList.toggle("hidden", !showTouch);
+        touch.setAttribute("aria-hidden", showTouch ? "false" : "true");
+      }
+    }
   },
   showEpilogue() {
     this.hideScreens();
@@ -958,15 +968,7 @@ const ui = {
     root.innerHTML = "";
     LEVELS.forEach((lv, i) => {
       const locked = lv.id > progress.unlocked;
-      const bucket = progress.best[lv.id];
-      let best = null;
-      if (bucket) {
-        if (bucket.grade != null && bucket.easy == null && bucket.normal == null) {
-          best = diffId === "normal" ? bucket : null;
-        } else {
-          best = bucket[diffId] || null;
-        }
-      }
+      const best = getBestForDiff(progress.best, lv.id, diffId);
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "level-btn";
@@ -978,7 +980,7 @@ const ui = {
           <div class="title">${locked ? "Lacrada" : lv.title}</div>
           <div class="desc">${locked ? "Complete a escala anterior" : lv.desc}</div>
         </span>
-        <span class="best">${best ? best.grade : locked ? "—" : "—"}</span>`;
+        <span class="best">${best ? best.grade : "—"}</span>`;
       btn.addEventListener("click", () => {
         unlockAudio();
         sfx("click");

@@ -72,6 +72,16 @@ export function bindInput() {
 /** Liga o painel #touch-controls (botoes data-action). */
 export function bindTouchControls(root) {
   if (!root) return;
+  const held = new Map(); // pointerId -> { action, btn }
+
+  const release = (pointerId) => {
+    const info = held.get(pointerId);
+    if (!info) return;
+    held.delete(pointerId);
+    setVirtualKey(info.action, false);
+    info.btn?.classList.remove("is-active");
+  };
+
   const onDown = (e) => {
     const btn = e.target.closest("[data-action]");
     if (!btn || !root.contains(btn)) return;
@@ -83,22 +93,24 @@ export function bindTouchControls(root) {
       window.setTimeout(() => btn.classList.remove("is-active"), 120);
       return;
     }
+    // Novo toque no mesmo dedo: solta o anterior
+    release(e.pointerId);
     setVirtualKey(action, true);
     btn.classList.add("is-active");
+    held.set(e.pointerId, { action, btn });
     btn.setPointerCapture?.(e.pointerId);
   };
+
   const onUp = (e) => {
-    const btn = e.target.closest("[data-action]");
-    if (!btn || !root.contains(btn)) return;
-    if (btn.dataset.tap === "1") return;
-    setVirtualKey(btn.dataset.action, false);
-    btn.classList.remove("is-active");
+    release(e.pointerId);
   };
+
   root.addEventListener("pointerdown", onDown);
   root.addEventListener("pointerup", onUp);
   root.addEventListener("pointercancel", onUp);
   root.addEventListener("lostpointercapture", onUp);
   window.addEventListener("blur", () => {
+    for (const id of [...held.keys()]) release(id);
     clearVirtualKeys();
     root.querySelectorAll(".is-active").forEach((el) => el.classList.remove("is-active"));
   });
