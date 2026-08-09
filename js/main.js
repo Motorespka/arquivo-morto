@@ -596,7 +596,7 @@ const ui = {
     }
     const hudBtn = $("btn-mute-hud");
     if (hudBtn) {
-      hudBtn.textContent = muted ? "🔇" : "🔊";
+      hudBtn.textContent = muted ? "Mudo" : "Som";
       hudBtn.setAttribute("aria-pressed", muted ? "true" : "false");
       hudBtn.title = muted ? "Ativar som" : "Mutar som";
     }
@@ -735,14 +735,14 @@ const ui = {
     const hold = state.player.hold;
     $("hud-hold").textContent = hold.length
       ? hold
-          .map(
-            (d) =>
-              (d.name || d.label) +
-              (d.mystery ? "?" : "") +
-              (d.marked ? "!" : "")
-          )
-          .join(" · ")
-      : "—";
+          .map((d) => {
+            const name = d.name || d.label || "doc";
+            if (d.mystery) return name + "?";
+            if (d.marked) return name + "!";
+            return name;
+          })
+          .join(" + ")
+      : "vazio";
 
     if (state.deadAura || state.hellMode) {
       timerEl.classList.add("timer-glitch");
@@ -784,13 +784,15 @@ const ui = {
 
     root.innerHTML = "";
     if (queue.empty) {
-      root.innerHTML = `<p class="mini-meta">Fila vazia</p>`;
+      root.innerHTML = `<p class="mini-meta">Ninguem na fila</p>`;
       return;
     }
     queue.items.forEach((c, i) => {
       const inGrace = !!(c.waitingPatient && (c.alwaysPatient || c.isFusion || (c.patientGrace ?? 0) > 0));
       const pct = inGrace ? 1 : Math.max(0, c.patience / c.maxPatience);
       const barClass = pct > 0.5 ? "" : pct > 0.25 ? "mid" : "low";
+      const mood =
+        inGrace ? "espera" : pct > 0.5 ? "calmo" : pct > 0.25 ? "nervoso" : "furioso";
       const div = document.createElement("div");
       div.className =
         "mini-card" +
@@ -803,7 +805,8 @@ const ui = {
         const s0 = getDocSpriteUrl(c.wantParts[0]);
         const s1 = getDocSpriteUrl(c.wantParts[1]);
         div.innerHTML = `
-          <span class="mini-label" style="border-color:${c.color}">Fusão</span>
+          <span class="mini-role">${i === 0 ? "Agora" : "Depois"}</span>
+          <span class="mini-label" style="border-color:${c.color}">Juntar 2</span>
           <div class="fusion-recipe">
             <div class="fusion-part">
               <img class="mini-sprite fusion-part-sprite" src="${s0}" alt="${names[0]}" />
@@ -815,22 +818,16 @@ const ui = {
               <span class="fusion-part-name">${names[1]}</span>
             </div>
           </div>
-          <span class="mini-meta">${i === 0 ? "► " : ""}${c.name} · paciente</span>
+          <span class="mini-meta">${c.name} · ${mood}</span>
           <div class="patience-bar"><span style="width:100%"></span></div>`;
       } else {
         const want = c.wantName || c.wantLabel;
         const sprite = getDocSpriteUrl(c.wantSprite || c.want);
-        const graceLeft = Math.ceil(c.patientGrace || 0);
-        const status =
-          inGrace && graceLeft > 0
-            ? ` · paciência ${graceLeft}s`
-            : inGrace
-              ? " · paciente"
-              : "";
         div.innerHTML = `
+          <span class="mini-role">${i === 0 ? "Agora" : "Depois"}</span>
           <span class="mini-label" style="border-color:${c.color}">${want}</span>
           <img class="mini-sprite" src="${sprite}" alt="${want}" />
-          <span class="mini-meta">${i === 0 ? "► " : ""}${c.name}${status}</span>
+          <span class="mini-meta">${c.name} · ${mood}</span>
           <div class="patience-bar ${barClass}"><span style="width:${pct * 100}%"></span></div>`;
       }
       root.appendChild(div);
@@ -881,17 +878,16 @@ const ui = {
         !hints.buriedGreen &&
         !hints.buriedBlue;
 
-      const fromTop = [...items].reverse();
-      const listHtml = empty
-        ? `<li class="stack-empty">vazia</li>`
-        : fromTop
-            .map((doc, i) => {
-              const n = doc.mystery ? "???" : doc.name || doc.label;
-              const cls = i === 0 ? "stack-item top" : "stack-item";
-              const mark = i === 0 ? "▲ " : "";
-              return `<li class="${cls}" style="border-color:${doc.color}">${mark}${n}</li>`;
-            })
-            .join("");
+      let tip = "sem uso agora";
+      if (empty) tip = "vazia";
+      else if (hints.yellow) tip = "pegue (topo certo)";
+      else if (hints.purple) tip = "serve pra fusao";
+      else if (hints.buriedGreen) tip = "certo, mas enterrado";
+      else if (hints.buriedBlue) tip = "fusao enterrada";
+      else if (missing) tip = "nao e o pedido";
+
+      const count = items.length;
+      const countLabel = empty ? "0 docs" : count === 1 ? "1 doc" : `${count} docs`;
 
       const spriteCls = [
         "mini-sprite",
@@ -907,16 +903,18 @@ const ui = {
         .filter(Boolean)
         .join(" ");
 
+      const kindLabel = kind === "cab" ? "Pasta" : "Caixa";
       const div = document.createElement("div");
       div.className = "mini-card archive-card" + (key === focusKey ? " active" : "");
       div.innerHTML = `
-        <span class="mini-meta archive-num">#${num}</span>
+        <span class="mini-role">${kindLabel} ${num}</span>
         ${
           sprite
             ? `<img class="${spriteCls}" src="${sprite}" alt="${topName}" />`
             : `<div class="${spriteCls}" style="background:#3a3228"></div>`
         }
-        <ul class="stack-list">${listHtml}</ul>`;
+        <span class="mini-label archive-top" style="border-color:${top?.color || "rgba(232,220,200,0.25)"}">${topName}</span>
+        <span class="mini-meta">${countLabel} · ${tip}</span>`;
       root.appendChild(div);
     });
   },

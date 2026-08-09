@@ -1112,11 +1112,15 @@ body.book-leaf-turning,
   border: 1px solid rgba(232, 220, 200, 0.25);
   background: rgba(26, 22, 18, 0.7);
   color: var(--paper);
-  font-size: 0.95rem;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   line-height: 1;
   padding: 8px 10px;
   cursor: pointer;
   border-radius: 4px;
+  min-width: 52px;
 }
 
 .btn-mute-hud:hover {
@@ -1255,11 +1259,45 @@ body.audio-muted #btn-mute {
 }
 
 .panel-title {
-  margin: 0 0 6px;
+  margin: 0 0 2px;
   font-family: var(--font-display);
-  font-size: 0.95rem;
-  color: var(--paper-dark);
+  font-size: 0.92rem;
+  color: #f0e2c4;
   text-align: center;
+}
+
+.panel-hint {
+  margin: 0 0 8px;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  color: rgba(232, 220, 200, 0.45);
+  text-align: center;
+  line-height: 1.2;
+}
+
+.mini-role {
+  display: inline-block;
+  margin-bottom: 1px;
+  padding: 1px 6px;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(232, 220, 200, 0.7);
+  background: rgba(232, 220, 200, 0.06);
+  border: 1px solid rgba(232, 220, 200, 0.12);
+}
+
+.mini-card.active .mini-role {
+  color: #f4ead4;
+  border-color: rgba(180, 35, 24, 0.45);
+  background: rgba(180, 35, 24, 0.16);
+}
+
+.mini-label.archive-top {
+  font-size: 0.72rem;
+  text-align: center;
+  line-height: 1.15;
 }
 
 .mini-hud-list {

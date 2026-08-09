@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Special+Elite&family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=20260808f" />
+  <link rel="stylesheet" href="css/style.css?v=20260809a" />
 </head>
 <body>
   <div id="app">
@@ -137,17 +137,17 @@
 
     <!-- HUD -->
     <div id="hud" class="hidden">
-      <header class="hud-bar">
+      <header class="hud-bar" aria-label="Status do turno">
         <div class="hud-block">
-          <span class="k">Turno</span>
+          <span class="k">Dia</span>
           <strong id="hud-level">1</strong>
         </div>
         <div class="hud-block timer-block">
-          <span class="k">Prazo</span>
+          <span class="k">Tempo</span>
           <strong id="hud-timer">2:00</strong>
         </div>
         <div class="hud-block">
-          <span class="k">Entregues</span>
+          <span class="k">Meta</span>
           <strong id="hud-served">0/0</strong>
         </div>
         <div class="hud-block">
@@ -155,19 +155,21 @@
           <strong id="hud-score">0</strong>
         </div>
         <div class="hud-block hold-block">
-          <span class="k">Mãos</span>
-          <strong id="hud-hold">—</strong>
+          <span class="k">Na mão</span>
+          <strong id="hud-hold">vazio</strong>
         </div>
-        <button id="btn-mute-hud" class="btn-mute-hud" type="button" title="Som" aria-pressed="false">🔊</button>
+        <button id="btn-mute-hud" class="btn-mute-hud" type="button" title="Som" aria-pressed="false">Som</button>
       </header>
 
       <aside id="queue-panel" class="mini-hud left-hud">
-        <p class="panel-title">Clientes</p>
+        <p class="panel-title">Fila — pedem</p>
+        <p class="panel-hint">O que entregar</p>
         <div id="queue-slots" class="mini-hud-list"></div>
       </aside>
 
       <aside id="archive-panel" class="mini-hud right-hud">
-        <p class="panel-title">Arquivos</p>
+        <p class="panel-title">Pastas — topo</p>
+        <p class="panel-hint">O que tem em cima</p>
         <div id="archive-slots" class="mini-hud-list"></div>
       </aside>
 
@@ -398,6 +400,6 @@
       if (landscape) document.documentElement.classList.add("touch-landscape");
     })();
   </script>
-  <script type="module" src="js/main.js?v=20260808f"></script>
+  <script type="module" src="js/main.js?v=20260809a"></script>
 </body>
 </html>
