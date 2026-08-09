@@ -2637,10 +2637,16 @@ html.touch-play .touch-controls {
 }
 
 .touch-actions {
-  display: grid;
-  grid-template-columns: 64px 64px;
-  grid-template-rows: 64px 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
   gap: 8px;
+}
+
+.touch-actions-row {
+  display: flex;
+  gap: 8px;
+  pointer-events: auto;
 }
 
 .touch-btn {
@@ -2674,13 +2680,13 @@ html.touch-play .touch-controls {
 }
 
 .touch-act {
-  width: 64px;
-  height: 64px;
+  width: 58px;
+  height: 58px;
 }
 
 .touch-act-main {
-  grid-column: 1 / -1;
-  width: 100%;
+  width: 190px;
+  height: 64px;
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.1), transparent 40%),
     linear-gradient(180deg, #c45a48 0%, #9a2e22 55%, #7a1810 100%);
