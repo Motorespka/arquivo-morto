@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Special+Elite&family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=20260808c" />
+  <link rel="stylesheet" href="css/style.css?v=20260808d" />
 </head>
 <body>
   <div id="app">
@@ -32,7 +32,8 @@
             <h1 class="folder-front-title">Arquivo<br />Morto</h1>
             <p class="folder-front-tag">Dossiê do estagiário</p>
             <p class="book-stamp folder-front-stamp">LACRADO</p>
-            <p class="folder-front-hint">Clique para abrir a pasta</p>
+            <p class="folder-front-hint hint-desk">Clique para abrir a pasta</p>
+            <p class="folder-front-hint hint-touch">Toque para abrir a pasta</p>
           </button>
           <div class="book-spread">
             <div class="book-page book-page-left">
@@ -44,11 +45,13 @@
               </p>
               <h2 class="menu-howto-title">Comandos</h2>
               <ul class="menu-howto-keys">
-                <li><kbd>WASD</kbd> mover</li>
+                <li class="hint-desk"><kbd>WASD</kbd> mover</li>
+                <li class="hint-touch"><kbd>▲◀▼▶</kbd> mover</li>
                 <li><kbd>E</kbd> pegar / entregar</li>
                 <li><kbd>R</kbd> reorganizar pilha <span class="menu-howto-lock">(só no turno 2+)</span></li>
                 <li><kbd>Q</kbd> soltar</li>
-                <li><kbd>Esc</kbd> pausar</li>
+                <li class="hint-desk"><kbd>Esc</kbd> pausar</li>
+                <li class="hint-touch"><kbd>II</kbd> pausar</li>
               </ul>
               <h2 class="menu-howto-title">Bordas nos armários</h2>
               <ul class="menu-howto-borders">
@@ -72,7 +75,8 @@
                 <button id="btn-howto" class="btn ghost" type="button">Manual do estagiário</button>
                 <button id="btn-mute" class="btn ghost btn-mute" type="button" aria-pressed="false">Som: ligado</button>
               </div>
-              <p class="hint-keys">WASD mover · E pegar / entregar · R reorganizar (turno 2+) · Q soltar</p>
+              <p class="hint-keys hint-keys-desk">WASD mover · E pegar / entregar · R reorganizar (turno 2+) · Q soltar</p>
+              <p class="hint-keys hint-keys-touch">Use o direcional e os botões E · R · Q · II na parte de baixo da tela</p>
             </div>
           </div>
         </div>
@@ -87,7 +91,8 @@
             <div class="book-page book-page-left">
               <h2>Manual do estagiário</h2>
               <ol class="howto-list">
-                <li><strong>Controles</strong> — <strong>WASD</strong> mover · <strong>E</strong> pegar num armário/caixa ou entregar no balcão · <strong>R</strong> reorganizar a pilha · <strong>Q</strong> soltar o que estiver na mão · <strong>Esc</strong> pausar.</li>
+                <li class="hint-desk"><strong>Controles</strong> — <strong>WASD</strong> mover · <strong>E</strong> pegar num armário/caixa ou entregar no balcão · <strong>R</strong> reorganizar a pilha · <strong>Q</strong> soltar o que estiver na mão · <strong>Esc</strong> pausar.</li>
+                <li class="hint-touch"><strong>Controles</strong> — direcional para mover · <strong>E</strong> pegar/entregar · <strong>R</strong> reorganizar · <strong>Q</strong> soltar · <strong>II</strong> pausar.</li>
                 <li><strong>Objetivo</strong> — complete a meta de entregas antes do prazo acabar. Cada cliente quer um tipo de documento.</li>
                 <li><strong>Fila</strong> — no balcão, <strong>E</strong> entrega para quem pedir o que você carrega (não precisa ser só o da frente).</li>
                 <li><strong>Bordas</strong> — <strong>amarela</strong>: o topo é o pedido da fila · <strong>verde piscando</strong>: o pedido está enterrado · <strong>azul piscando</strong>: peça de fusão enterrada · <strong>roxa</strong>: o topo serve para uma fusão pedida.</li>
@@ -371,6 +376,6 @@
       if (enable) document.documentElement.classList.add("touch-play");
     })();
   </script>
-  <script type="module" src="js/main.js?v=20260808c"></script>
+  <script type="module" src="js/main.js?v=20260808d"></script>
 </body>
 </html>

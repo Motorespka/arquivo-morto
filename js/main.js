@@ -96,11 +96,14 @@ const ui = {
   showHud(on) {
     $("hud").classList.toggle("hidden", !on);
     const touch = $("touch-controls");
-    if (!touch) return;
-    const useTouch = document.documentElement.classList.contains("touch-play");
-    const show = !!(on && useTouch);
-    touch.classList.toggle("hidden", !show);
-    touch.setAttribute("aria-hidden", show ? "false" : "true");
+    if (touch) {
+      const useTouch = this._isTouchPlay();
+      const show = !!(on && useTouch);
+      touch.classList.toggle("hidden", !show);
+      touch.setAttribute("aria-hidden", show ? "false" : "true");
+    }
+    // Recalcula canvas acima do pad
+    window.dispatchEvent(new Event("resize"));
   },
   hideScreens() {
     [
@@ -213,7 +216,20 @@ const ui = {
   _wait(ms) {
     return new Promise((r) => window.setTimeout(r, ms));
   },
-  _waitForWidth(el, timeoutMs = 850) {
+  _isTouchPlay() {
+    return document.documentElement.classList.contains("touch-play");
+  },
+  _touchChromePx() {
+    if (!this._isTouchPlay()) return 0;
+    const tc = $("touch-controls");
+    if (!tc || tc.classList.contains("hidden")) return 0;
+    const h = tc.getBoundingClientRect().height;
+    if (h > 40) return Math.ceil(h);
+    const css = getComputedStyle(document.documentElement).getPropertyValue("--touch-chrome");
+    const n = parseFloat(css);
+    return Number.isFinite(n) ? Math.ceil(n) : 188;
+  },
+  _waitForWidth(el, timeoutMs) {
     return new Promise((resolve) => {
       if (!el) {
         resolve();
@@ -226,6 +242,8 @@ const ui = {
         resolve();
         return;
       }
+      const ms =
+        timeoutMs != null ? timeoutMs : this._isTouchPlay() ? 420 : 850;
       let done = false;
       const finish = () => {
         if (done) return;
@@ -238,7 +256,7 @@ const ui = {
         if (e.target === el && e.propertyName === "width") finish();
       };
       el.addEventListener("transitionend", onEnd);
-      const timer = window.setTimeout(finish, timeoutMs);
+      const timer = window.setTimeout(finish, ms);
     });
   },
   _clearTurningFolders() {
@@ -331,8 +349,8 @@ const ui = {
     const reduce =
       typeof window.matchMedia === "function" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    // Deve bater com o CSS (0.9s / 0.45s)
-    const turnMs = reduce ? 450 : 900;
+    // Deve bater com o CSS (0.9s desktop / 0.48s touch / 0.45s reduce)
+    const turnMs = reduce ? 350 : this._isTouchPlay() ? 480 : 900;
     const midMs = Math.round(turnMs / 2);
     const endMs = turnMs - midMs;
     const sideCls = dir > 0 ? "is-turning-next" : "is-turning-prev";
@@ -933,10 +951,26 @@ function boot() {
   ui.syncMuteButton();
 
   function resize() {
-    const touch = document.documentElement.classList.contains("touch-play");
-    const w = Math.max(touch ? 320 : 640, window.innerWidth);
-    const h = Math.max(touch ? 280 : 360, window.innerHeight);
+    const touch = ui._isTouchPlay();
+    const chrome = ui._touchChromePx();
+    const vw = window.visualViewport?.width || window.innerWidth;
+    const vh = window.visualViewport?.height || window.innerHeight;
+    const w = Math.max(touch ? 320 : 640, Math.round(vw));
+    const h = Math.max(touch ? 240 : 360, Math.round(vh - chrome));
     game.resize(w, h);
+    canvas.style.width = `${w}px`;
+    canvas.style.height = `${h}px`;
+    if (touch) {
+      canvas.style.top = "0";
+      canvas.style.left = "0";
+      canvas.style.right = "auto";
+      canvas.style.bottom = "auto";
+    } else {
+      canvas.style.top = "";
+      canvas.style.left = "";
+      canvas.style.right = "";
+      canvas.style.bottom = "";
+    }
     if (game.mode !== "play") {
       const ctx = canvas.getContext("2d");
       const dpr = game.dpr || 1;
@@ -944,11 +978,13 @@ function boot() {
       ctx.fillStyle = "#0e0c0a";
       ctx.fillRect(0, 0, w, h);
       ctx.fillStyle = "rgba(232,220,200,0.06)";
-      ctx.font = "28px Special Elite, monospace";
-      ctx.fillText("ARQUIVO MORTO · SETOR 404", 48, 72);
+      ctx.font = touch ? "18px Special Elite, monospace" : "28px Special Elite, monospace";
+      ctx.fillText("ARQUIVO MORTO · SETOR 404", touch ? 16 : 48, touch ? 40 : 72);
     }
   }
   window.addEventListener("resize", resize);
+  window.visualViewport?.addEventListener("resize", resize);
+  window.visualViewport?.addEventListener("scroll", resize);
   resize();
 
   $("btn-open-folder")?.addEventListener("click", () => {

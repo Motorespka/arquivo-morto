@@ -243,9 +243,10 @@ export class Game {
     sfx("start");
 
     const baseSpeed = level.playerSpeed ?? 170;
-    let moveSpeed = baseSpeed;
-    if (deadAura) moveSpeed = baseSpeed * 0.5;
-    else if (hellMode) moveSpeed = baseSpeed * 0.36;
+    const touchMul = document.documentElement.classList.contains("touch-play") ? 1.14 : 1;
+    let moveSpeed = baseSpeed * touchMul;
+    if (deadAura) moveSpeed = baseSpeed * 0.5 * touchMul;
+    else if (hellMode) moveSpeed = baseSpeed * 0.36 * touchMul;
     const player = createPlayer(world.playerStart, this.progress.upgrades, moveSpeed);
     world.deadAura = deadAura;
     world.hellMode = hellMode;

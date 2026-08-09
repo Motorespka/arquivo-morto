@@ -40,6 +40,7 @@ body {
   position: relative;
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   background: #0e0c0a;
 }
@@ -1024,8 +1025,9 @@ body.book-leaf-turning,
 @media (max-width: 820px) {
   :root {
     --menu-book-w: min(96vw, 560px);
-    --menu-book-h: min(78vh, 720px);
-    --menu-file-w: min(72vw, 300px);
+    /* Mantem 2 colunas para a virada de pagina funcionar no celular */
+    --menu-book-h: min(70dvh, 560px);
+    --menu-file-w: min(52vw, 280px);
   }
 
   .folder,
@@ -1034,26 +1036,50 @@ body.book-leaf-turning,
   }
 
   .folder-tab {
-    margin-left: 18px;
+    margin-left: 12px;
+    padding: 8px 14px 7px;
+    font-size: 0.72rem;
   }
 
   .book-spread {
-    grid-template-columns: 1fr;
-  }
-
-  .book-spread::before,
-  .book-spread::after {
-    display: none;
+    grid-template-columns: 1fr 1fr;
   }
 
   .book-page-left,
   .book-page-right {
-    box-shadow: none;
-    padding: 22px 20px;
+    padding: 14px 12px;
+    font-size: 0.88rem;
   }
 
-  .book-page-left {
-    border-bottom: 1px dashed rgba(90, 70, 40, 0.25);
+  .folder h1 {
+    font-size: clamp(1.45rem, 6vw, 2rem);
+  }
+
+  .book-dossier {
+    font-size: clamp(1.4rem, 5.5vw, 2rem);
+  }
+
+  .screen {
+    padding: 10px;
+    padding-top: max(10px, env(safe-area-inset-top, 0px));
+    padding-bottom: max(10px, env(safe-area-inset-bottom, 0px));
+  }
+
+  .btn {
+    min-height: 44px;
+    padding: 10px 14px;
+  }
+
+  .btn-row {
+    gap: 8px;
+  }
+
+  .grade {
+    font-size: 3.2rem;
+  }
+
+  .hold-block {
+    display: block;
   }
 }
 
@@ -2545,13 +2571,9 @@ body.false-end-mode #turn-intro {
     padding: 4px 8px;
   }
 
-  .hold-block {
-    display: none;
-  }
-
   .title-panel,
   .card {
-    padding: 28px 22px;
+    padding: 18px 14px;
   }
 }
 
@@ -2566,12 +2588,39 @@ body.false-end-mode #turn-intro {
 }
 
 /* ——— Controles touch (modo celular) ——— */
+html.touch-play {
+  --touch-chrome: 188px;
+  --menu-book-w: min(96vw, 520px);
+  --menu-book-h: min(62dvh, 480px);
+  --menu-file-w: min(48vw, 240px);
+}
+
 html.touch-play,
 html.touch-play body {
   touch-action: none;
   overscroll-behavior: none;
   user-select: none;
   -webkit-user-select: none;
+  height: 100%;
+  height: 100dvh;
+}
+
+html.touch-play #app {
+  height: 100%;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+html.touch-play #game {
+  width: 100%;
+  height: auto;
+  inset: auto;
+  top: 0;
+  left: 0;
+  right: 0;
+  /* altura definida via JS (viewport - touch chrome) */
+  max-height: calc(100dvh - var(--touch-chrome));
+  background: #1c1814;
 }
 
 html.touch-play .screen,
@@ -2582,19 +2631,93 @@ html.touch-play .touch-controls {
   user-select: none;
 }
 
+/* Menus: animacoes mais curtas e tipografia compacta */
+html.touch-play #title-folder {
+  transition-duration: 0.32s;
+}
+
+html.touch-play .page-leaf.turn-next.play .page-leaf-inner,
+html.touch-play .page-leaf.turn-prev.play .page-leaf-inner {
+  animation-duration: 0.48s;
+}
+
+html.touch-play .folder-front-hint {
+  animation-duration: 2.4s;
+}
+
+html.touch-play .folder-front-title {
+  font-size: clamp(1.6rem, 8vw, 2.2rem);
+}
+
+html.touch-play .folder-front-tag,
+html.touch-play .folder-front-stamp {
+  font-size: 0.8rem;
+}
+
+html.touch-play .menu-howto-lead,
+html.touch-play .pitch,
+html.touch-play .tagline,
+html.touch-play .howto-list {
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+html.touch-play .menu-howto-title {
+  font-size: 0.95rem;
+  margin: 8px 0 4px;
+}
+
+html.touch-play .menu-howto-keys,
+html.touch-play .menu-howto-borders {
+  font-size: 0.78rem;
+  gap: 4px;
+}
+
+html.touch-play .hint-keys-desk {
+  display: none;
+}
+
+html.touch-play .hint-keys-touch {
+  display: block;
+}
+
+html:not(.touch-play) .hint-keys-touch {
+  display: none;
+}
+
+html.touch-play .hint-desk {
+  display: none !important;
+}
+
+html:not(.touch-play) .hint-touch {
+  display: none !important;
+}
+
+html.touch-play .btn-row {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+html.touch-play .btn-row .btn {
+  width: 100%;
+}
+
 .touch-controls {
   position: fixed;
   z-index: 55;
   left: 0;
   right: 0;
   bottom: 0;
+  height: var(--touch-chrome);
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  gap: 12px;
-  padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px));
+  gap: 10px;
+  padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
   pointer-events: none;
-  background: linear-gradient(180deg, transparent, rgba(10, 8, 6, 0.55) 40%);
+  background:
+    linear-gradient(180deg, transparent 0%, rgba(10, 8, 6, 0.72) 28%, rgba(10, 8, 6, 0.92) 100%);
+  box-sizing: border-box;
 }
 
 .touch-controls.hidden {
@@ -2608,9 +2731,9 @@ html.touch-play .touch-controls {
 
 .touch-pad {
   display: grid;
-  grid-template-columns: 58px 58px 58px;
-  grid-template-rows: 58px 58px 58px;
-  gap: 6px;
+  grid-template-columns: 56px 56px 56px;
+  grid-template-rows: 56px 56px 56px;
+  gap: 5px;
   grid-template-areas:
     ". up ."
     "left center right"
@@ -2640,12 +2763,12 @@ html.touch-play .touch-controls {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 8px;
+  gap: 6px;
 }
 
 .touch-actions-row {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   pointer-events: auto;
 }
 
@@ -2664,91 +2787,172 @@ html.touch-play .touch-controls {
   line-height: 1;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.35);
   -webkit-tap-highlight-color: transparent;
+  transition: transform 0.08s ease, filter 0.08s ease;
 }
 
 .touch-btn.is-active,
 .touch-btn:active {
-  transform: translateY(1px) scale(0.97);
-  filter: brightness(1.08);
+  transform: translateY(1px) scale(0.96);
+  filter: brightness(1.1);
 }
 
 .touch-dir {
-  width: 58px;
-  height: 58px;
+  width: 56px;
+  height: 56px;
   border-radius: 12px;
-  font-size: 1.15rem;
+  font-size: 1.1rem;
 }
 
 .touch-act {
-  width: 58px;
-  height: 58px;
+  width: 56px;
+  height: 56px;
 }
 
 .touch-act-main {
-  width: 190px;
-  height: 64px;
+  width: 180px;
+  height: 60px;
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.1), transparent 40%),
     linear-gradient(180deg, #c45a48 0%, #9a2e22 55%, #7a1810 100%);
   border-color: #4a100c;
   color: #f8ebe0;
-  font-size: 1.35rem;
+  font-size: 1.3rem;
 }
 
 .touch-act-pause {
-  background: rgba(26, 22, 18, 0.82);
+  background: rgba(26, 22, 18, 0.88);
   border-color: rgba(232, 220, 200, 0.28);
   color: var(--paper);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   letter-spacing: 0.08em;
+}
+
+html.touch-play .hud-bar {
+  top: max(8px, env(safe-area-inset-top, 0px));
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 6px;
+  padding: 5px 6px;
+  max-width: calc(100% - 12px);
+  font-size: 0.72rem;
+}
+
+html.touch-play .hud-block {
+  min-width: 0;
+  padding: 4px 8px;
+}
+
+html.touch-play .hud-block .k {
+  font-size: 0.62rem;
+}
+
+html.touch-play .hud-block strong {
+  font-size: 0.95rem;
+}
+
+html.touch-play .hold-block {
+  display: block;
 }
 
 html.touch-play .mini-hud {
   top: auto;
-  bottom: 168px;
-  max-height: 28vh;
-  width: 96px;
-  padding: 5px 4px;
+  bottom: calc(var(--touch-chrome) + 6px);
+  max-height: 22vh;
+  width: 88px;
+  padding: 4px 3px;
+  overflow: auto;
 }
 
 html.touch-play .mini-hud.left-hud {
-  left: 6px;
+  left: max(4px, env(safe-area-inset-left, 0px));
 }
 
 html.touch-play .mini-hud.right-hud {
-  right: 6px;
-  width: 150px;
+  right: max(4px, env(safe-area-inset-right, 0px));
+  width: 132px;
 }
 
-html.touch-play .hud-bar {
-  flex-wrap: wrap;
-  gap: 4px 8px;
-  padding: 6px 8px;
-  font-size: 0.78rem;
+html.touch-play .panel-title {
+  font-size: 0.65rem;
+  margin-bottom: 2px;
 }
 
-html.touch-play .prompt {
-  bottom: 170px;
+html.touch-play .toast,
+html.touch-play .prompt,
+html.touch-play .turn-intro {
+  bottom: calc(var(--touch-chrome) + 10px);
 }
 
-@media (max-width: 420px) {
+html.touch-play .serve-feed {
+  bottom: calc(var(--touch-chrome) + 48px);
+  right: max(8px, env(safe-area-inset-right, 0px));
+  max-width: 46vw;
+}
+
+html.touch-play .event-banner {
+  top: calc(56px + env(safe-area-inset-top, 0px));
+  font-size: 0.85rem;
+  padding: 8px 12px;
+  max-width: min(94%, 420px);
+}
+
+html.touch-play .grade {
+  font-size: 2.8rem;
+}
+
+@media (max-width: 380px) {
+  html.touch-play {
+    --touch-chrome: 176px;
+  }
+
   .touch-pad {
-    grid-template-columns: 52px 52px 52px;
-    grid-template-rows: 52px 52px 52px;
+    grid-template-columns: 50px 50px 50px;
+    grid-template-rows: 50px 50px 50px;
+    gap: 4px;
   }
 
-  .touch-dir {
-    width: 52px;
-    height: 52px;
-  }
-
-  .touch-actions {
-    grid-template-columns: 56px 56px;
-    grid-template-rows: 56px 56px;
-  }
-
+  .touch-dir,
   .touch-act {
-    width: 56px;
-    height: 56px;
+    width: 50px;
+    height: 50px;
+  }
+
+  .touch-act-main {
+    width: 162px;
+    height: 54px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 480px) {
+  html.touch-play {
+    --touch-chrome: 132px;
+    --menu-book-h: min(78dvh, 360px);
+  }
+
+  .touch-pad {
+    grid-template-columns: 44px 44px 44px;
+    grid-template-rows: 44px 44px 44px;
+    gap: 3px;
+  }
+
+  .touch-dir,
+  .touch-act {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+  }
+
+  .touch-act-main {
+    width: 140px;
+    height: 48px;
+    font-size: 1.1rem;
+  }
+
+  html.touch-play .mini-hud {
+    max-height: 18vh;
+    bottom: calc(var(--touch-chrome) + 4px);
   }
 }
