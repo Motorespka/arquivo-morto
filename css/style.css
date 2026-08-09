@@ -3031,10 +3031,10 @@ html.touch-play .grade {
 
 html.touch-play.is-landscape {
   --touch-chrome: 0px;
-  --touch-side-left: 128px;
-  --touch-side-right: 148px;
-  --menu-book-h: min(84dvh, 420px);
-  --menu-book-w: min(92vw, 720px);
+  --touch-side-left: 168px;
+  --touch-side-right: 188px;
+  --menu-book-h: min(86dvh, 440px);
+  --menu-book-w: min(94vw, 760px);
 }
 
 html.touch-play.is-landscape #game {
@@ -3051,86 +3051,276 @@ html.touch-play.is-landscape .touch-controls {
   pointer-events: none;
 }
 
+/* Controles maiores nas laterais */
 html.touch-play.is-landscape .touch-pad {
   position: absolute;
-  left: max(8px, env(safe-area-inset-left, 0px));
-  bottom: max(12px, env(safe-area-inset-bottom, 0px));
+  left: max(10px, env(safe-area-inset-left, 0px));
+  bottom: max(14px, env(safe-area-inset-bottom, 0px));
   top: auto;
-  grid-template-columns: 48px 48px 48px;
-  grid-template-rows: 48px 48px 48px;
-  gap: 4px;
+  grid-template-columns: 64px 64px 64px;
+  grid-template-rows: 64px 64px 64px;
+  gap: 7px;
 }
 
 html.touch-play.is-landscape .touch-actions {
   position: absolute;
-  right: max(8px, env(safe-area-inset-right, 0px));
-  bottom: max(12px, env(safe-area-inset-bottom, 0px));
+  right: max(10px, env(safe-area-inset-right, 0px));
+  bottom: max(14px, env(safe-area-inset-bottom, 0px));
   top: auto;
+  gap: 8px;
+}
+
+html.touch-play.is-landscape .touch-actions-row {
+  gap: 8px;
 }
 
 html.touch-play.is-landscape .touch-dir,
 html.touch-play.is-landscape .touch-act {
-  width: 48px;
-  height: 48px;
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  font-size: 1.25rem;
+  border-width: 3px;
 }
 
 html.touch-play.is-landscape .touch-act-main {
-  width: 156px;
-  height: 52px;
-  font-size: 1.2rem;
+  width: 204px;
+  height: 72px;
+  font-size: 1.55rem;
+  border-radius: 16px;
+  border-width: 3px;
 }
 
+html.touch-play.is-landscape .touch-act-pause {
+  font-size: 1.05rem;
+}
+
+/* HUD superior mais legivel */
+html.touch-play.is-landscape .hud-bar {
+  top: max(8px, env(safe-area-inset-top, 0px));
+  gap: 6px 8px;
+  padding: 7px 10px;
+  max-width: calc(100% - var(--touch-side-left) - var(--touch-side-right) - 20px);
+  background: rgba(14, 12, 10, 0.92);
+  border: 1px solid rgba(232, 220, 200, 0.22);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+}
+
+html.touch-play.is-landscape .hud-block {
+  min-width: 64px;
+  padding: 6px 10px;
+  background: rgba(232, 220, 200, 0.07);
+}
+
+html.touch-play.is-landscape .hud-block .k {
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+}
+
+html.touch-play.is-landscape .hud-block strong {
+  font-size: 1.12rem;
+}
+
+html.touch-play.is-landscape .btn-mute-hud {
+  min-width: 44px;
+  min-height: 44px;
+  font-size: 1.05rem;
+}
+
+/* Painéis laterais mais claros */
 html.touch-play.is-landscape .mini-hud {
-  bottom: 12px;
-  max-height: 42vh;
+  top: calc(58px + env(safe-area-inset-top, 0px));
+  bottom: auto;
+  max-height: calc(100dvh - 96px);
+  padding: 8px 7px;
+  background: rgba(14, 12, 10, 0.88);
+  border: 1px solid rgba(232, 220, 200, 0.18);
+  overflow: auto;
 }
 
 html.touch-play.is-landscape .mini-hud.left-hud {
-  left: calc(var(--touch-side-left) + 4px);
+  left: calc(var(--touch-side-left) + 6px);
+  width: 104px;
 }
 
 html.touch-play.is-landscape .mini-hud.right-hud {
-  right: calc(var(--touch-side-right) + 4px);
-  width: 140px;
+  right: calc(var(--touch-side-right) + 6px);
+  width: 156px;
+}
+
+html.touch-play.is-landscape .panel-title {
+  font-size: 0.72rem;
+  margin-bottom: 6px;
+  color: #e8dcc8;
 }
 
 html.touch-play.is-landscape .toast,
-html.touch-play.is-landscape .prompt,
-html.touch-play.is-landscape .turn-intro {
-  bottom: 16px;
+html.touch-play.is-landscape .prompt {
+  bottom: 18px;
   left: 50%;
-  max-width: min(52vw, 420px);
+  max-width: min(48vw, 400px);
+  font-size: 0.95rem;
+  padding: 10px 16px;
 }
 
 html.touch-play.is-landscape .serve-feed {
-  bottom: 56px;
-  right: calc(var(--touch-side-right) + 8px);
+  bottom: 58px;
+  right: calc(var(--touch-side-right) + 10px);
+  max-width: 36vw;
 }
 
-html.touch-play.is-landscape .hud-bar {
-  max-width: calc(100% - var(--touch-side-left) - var(--touch-side-right) - 16px);
+html.touch-play.is-landscape .event-banner {
+  top: calc(58px + env(safe-area-inset-top, 0px));
+  font-size: 0.95rem;
+  padding: 10px 16px;
 }
 
-@media (orientation: landscape) and (max-height: 420px) {
+/* Dialogo do chefe / turno: cartao central */
+html.touch-play.is-landscape .turn-intro {
+  left: 50%;
+  top: 50%;
+  bottom: auto;
+  transform: translate(-50%, -50%);
+  width: min(560px, calc(100vw - var(--touch-side-left) - var(--touch-side-right) - 32px));
+  max-width: min(560px, 58vw);
+  padding: 18px 20px 16px;
+  gap: 14px;
+  border: 2px solid rgba(232, 220, 200, 0.28);
+  background: rgba(12, 10, 8, 0.96);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.55);
+}
+
+html.touch-play.is-landscape .turn-intro-speaker {
+  font-size: 0.85rem;
+}
+
+html.touch-play.is-landscape .turn-intro-text {
+  font-size: 1.05rem;
+  line-height: 1.45;
+}
+
+html.touch-play.is-landscape .turn-intro .btn {
+  align-self: stretch;
+  min-height: 48px;
+  min-width: 0;
+  font-size: 1rem;
+}
+
+/* Documento classificado / escolhas */
+html.touch-play.is-landscape .mystery {
+  padding: 12px calc(var(--touch-side-right) + 12px) 12px calc(var(--touch-side-left) + 12px);
+  background: rgba(6, 5, 4, 0.88);
+}
+
+html.touch-play.is-landscape .mystery-stamp {
+  font-size: 0.9rem;
+}
+
+html.touch-play.is-landscape #mystery-text {
+  max-width: min(520px, 56vw);
+  margin: 0 auto 14px;
+  padding: 18px 20px;
+  font-size: 0.98rem;
+  line-height: 1.45;
+  transform: none;
+}
+
+html.touch-play.is-landscape .mystery-actions {
+  width: min(420px, 52vw);
+  margin: 0 auto;
+  gap: 12px;
+}
+
+html.touch-play.is-landscape .mystery-actions .btn {
+  min-height: 52px;
+  font-size: 1.02rem;
+}
+
+html.touch-play.is-landscape .mystery-hint {
+  max-width: min(420px, 52vw);
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 0.88rem;
+}
+
+/* Menus / pausa / escalas: botoes maiores */
+html.touch-play.is-landscape .screen {
+  padding: 8px max(12px, env(safe-area-inset-right, 0px)) 8px max(12px, env(safe-area-inset-left, 0px));
+}
+
+html.touch-play.is-landscape .btn {
+  min-height: 48px;
+  font-size: 0.98rem;
+  padding: 12px 16px;
+}
+
+html.touch-play.is-landscape .btn-row {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+html.touch-play.is-landscape .btn-row .btn {
+  width: auto;
+  flex: 1 1 160px;
+  min-height: 48px;
+}
+
+html.touch-play.is-landscape .btn-row.col {
+  flex-direction: column;
+}
+
+html.touch-play.is-landscape .btn-row.col .btn {
+  width: 100%;
+}
+
+html.touch-play.is-landscape .level-btn {
+  min-height: 64px;
+  padding: 12px 14px;
+}
+
+html.touch-play.is-landscape .level-btn .title {
+  font-size: 1rem;
+}
+
+html.touch-play.is-landscape .level-btn .desc {
+  font-size: 0.82rem;
+}
+
+html.touch-play.is-landscape .folder-page,
+html.touch-play.is-landscape .book-page {
+  font-size: 0.92rem;
+}
+
+@media (orientation: landscape) and (max-height: 400px) {
   html.touch-play.is-landscape {
-    --touch-side-left: 118px;
-    --touch-side-right: 132px;
+    --touch-side-left: 148px;
+    --touch-side-right: 168px;
   }
 
   html.touch-play.is-landscape .touch-pad {
-    grid-template-columns: 44px 44px 44px;
-    grid-template-rows: 44px 44px 44px;
+    grid-template-columns: 56px 56px 56px;
+    grid-template-rows: 56px 56px 56px;
+    gap: 5px;
   }
 
   html.touch-play.is-landscape .touch-dir,
   html.touch-play.is-landscape .touch-act {
-    width: 44px;
-    height: 44px;
+    width: 56px;
+    height: 56px;
   }
 
   html.touch-play.is-landscape .touch-act-main {
-    width: 140px;
-    height: 46px;
+    width: 180px;
+    height: 62px;
+  }
+
+  html.touch-play.is-landscape .turn-intro {
+    padding: 14px 16px;
+  }
+
+  html.touch-play.is-landscape .turn-intro-text {
+    font-size: 0.95rem;
   }
 }
 

@@ -254,8 +254,8 @@ const ui = {
       return {
         top: 0,
         bottom: 0,
-        left: Number.isFinite(left) ? Math.ceil(left) : 128,
-        right: Number.isFinite(right) ? Math.ceil(right) : 140,
+        left: Number.isFinite(left) ? Math.ceil(left) : 168,
+        right: Number.isFinite(right) ? Math.ceil(right) : 188,
       };
     }
     return { top: 0, right: 0, bottom: this._touchChromePx(), left: 0 };
