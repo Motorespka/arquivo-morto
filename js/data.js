@@ -335,7 +335,7 @@ export const UPGRADES = {
   bigger_cabinets: {
     id: "bigger_cabinets",
     name: "Arquivo padronizado",
-    desc: "Caixas oficiais: no máximo 5 documentos",
+    desc: "Pilhas oficiais com ate 5 documentos",
   },
   auto_labels: {
     id: "auto_labels",
@@ -360,7 +360,7 @@ export const UPGRADES = {
   smart_file: {
     id: "smart_file",
     name: "Arquivamento inteligente",
-    desc: "Árvore de categorias disponível",
+    desc: "+10 pts ao arquivar no setor certo",
   },
 };
 

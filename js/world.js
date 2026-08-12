@@ -250,8 +250,8 @@ const MAPS = { small: buildSmall, medium: buildMedium, large: buildLarge };
 export function createWorld(level, upgrades = new Set()) {
   const builder = MAPS[level.map] || buildSmall;
   const base = builder();
-  const BOX_CAPACITY = 5;
-  const capacity = BOX_CAPACITY;
+  // Melhoria "Arquivo padronizado": 5 docs; sem ela, pilhas menores
+  const capacity = upgrades.has("bigger_cabinets") ? 5 : Math.min(4, level.capacity || 4);
 
   const cabinets = base.cabPos.map(([tx, ty], i) => {
     const stack = new Stack(capacity);
@@ -290,7 +290,7 @@ export function createWorld(level, upgrades = new Set()) {
   for (let y = 0; y < base.H; y++) {
     for (let x = 0; x < base.W; x++) {
       if (base.grid[y][x] === T.BOX) {
-        const stack = new Stack(BOX_CAPACITY);
+        const stack = new Stack(capacity);
         stack.push(makeDoc(rand(DOC_TYPES).id));
         stack.push(makeDoc(rand(DOC_TYPES).id));
         boxes.push({

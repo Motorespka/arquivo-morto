@@ -22,6 +22,8 @@ import {
   gradeFor,
   rand,
   uid,
+  docMatchesWant,
+  collectQueueWants,
 } from "./data.js";
 import {
   createWorld,
@@ -33,12 +35,11 @@ import {
   copierAt,
   computerAt,
   spawnHmmBox,
-  docMatchesWant,
   TILE,
 } from "./world.js";
 import { createPlayer, updatePlayer } from "./player.js";
 import { createCamera, updateCamera, render, computeFitZoom } from "./renderer.js";
-import { pollInput, consumeCheat } from "./input.js";
+import { pollInput, consumeCheat, clearInputBuffers, clearPressed } from "./input.js";
 import { play as sfx, setAmbience, toggleMute, isMuted, bindAudioUnlock, unlockAudio } from "./audio.js";
 
 const COLORS = ["#2f5d50", "#3d5a80", "#9b2226", "#6b4f2a", "#5a6a72", "#8b4513"];
@@ -75,7 +76,11 @@ function loadProgress() {
 }
 
 function saveProgress(p) {
-  localStorage.setItem("arquivo_morto_v1", JSON.stringify(p));
+  try {
+    localStorage.setItem("arquivo_morto_v1", JSON.stringify(p));
+  } catch (err) {
+    console.warn("[Arquivo Morto] nao foi possivel salvar progresso:", err);
+  }
 }
 
 export function getProgress() {
@@ -88,6 +93,7 @@ export function getProgress() {
     mysterySeen: p.mysterySeen ?? 0,
     pendingDeadTurn: !!p.pendingDeadTurn,
     pendingDeadLevelId: p.pendingDeadLevelId ?? null,
+    pendingHellTurn: !!p.pendingHellTurn,
     afterDeadHell: !!p.afterDeadHell,
     mindArchive: !!p.mindArchive,
     trueEnd: !!p.trueEnd,
@@ -103,6 +109,7 @@ function persist(progress) {
     mysterySeen: progress.mysterySeen,
     pendingDeadTurn: !!progress.pendingDeadTurn,
     pendingDeadLevelId: progress.pendingDeadLevelId ?? null,
+    pendingHellTurn: !!progress.pendingHellTurn,
     afterDeadHell: !!progress.afterDeadHell,
     mindArchive: !!progress.mindArchive,
     trueEnd: !!progress.trueEnd,
@@ -264,6 +271,27 @@ export class Game {
     const baseLevel = LEVELS[index];
     if (!baseLevel || baseLevel.id > this.progress.unlocked) return;
 
+    let special = opts.special || null;
+
+    // Entrada normal pelo menu: limpa flags de historia que sobraram
+    if (!special) {
+      this._endedAsDead = false;
+      this._retrySpecial = null;
+      if (this.progress.pendingDeadTurn || this.progress.pendingDeadLevelId != null) {
+        this.progress.pendingDeadTurn = false;
+        this.progress.pendingDeadLevelId = null;
+        persist(this.progress);
+      }
+      // Turno 5 so vira inferno se o protocolo morto acabou de liberar (pendingHellTurn)
+      if (
+        baseLevel.id === 5 &&
+        this.progress.pendingHellTurn &&
+        !this.progress.trueEnd
+      ) {
+        special = "hell";
+      }
+    }
+
     const diffId = this.progress.difficulty || "normal";
     const level = applyDifficulty(baseLevel, diffId);
 
@@ -271,23 +299,22 @@ export class Game {
     const world = createWorld(level, this.progress.upgrades);
     world._api = { collides };
 
-    // Morto/inferno NUNCA vêm do menu — só via special (história / cheat / retry)
-    const special = opts.special || null;
+    // Morto/inferno NUNCA vêm do menu — so via special (historia / cheat / retry)
     const deadAura = special === "dead";
     const hellMode = special === "hell";
-
-    // Entrada normal pelo menu: limpa flags de historia que sobraram
-    if (!special) {
-      this._endedAsDead = false;
-      this._retrySpecial = null;
-    }
 
     if (deadAura) {
       this.progress.pendingDeadTurn = false;
       this.progress.pendingDeadLevelId = null;
       persist(this.progress);
     }
+    if (hellMode) {
+      this.progress.pendingHellTurn = false;
+      this.progress.afterDeadHell = true;
+      persist(this.progress);
+    }
     this._runSpecial = deadAura ? "dead" : hellMode ? "hell" : null;
+    clearInputBuffers();
 
     document.body.classList.toggle("dead-aura", deadAura);
     document.body.classList.toggle("hell-mode", hellMode);
@@ -428,6 +455,7 @@ export class Game {
 
   enterPlay(toastMsg) {
     this.mode = "play";
+    clearPressed();
     this.ui.showHud(true);
     if (this.state) {
       this.ui.updateHud(this.state, this.state.world.level);
@@ -865,9 +893,11 @@ export class Game {
     }
     if (consumeCheat("turno")) {
       this.adminNextTurn();
+      return;
     }
     if (consumeCheat("inferno")) {
       this.adminHellTurn5();
+      return;
     }
 
     if (input.pause) {
@@ -1070,10 +1100,7 @@ export class Game {
         return;
       }
     } else if (hell) {
-      if (s.served >= s.world.level.goal) {
-        this.endLevel();
-        return;
-      }
+      // Inferno so termina pela pistola / final verdadeiro — meta nao encerra
     } else if (s.timeLeft <= 0) {
       s.timeLeft = 0;
       this.endLevel();
@@ -1272,7 +1299,14 @@ export class Game {
         : `Entregue a ${customer.name}${posNote}! +${bonus}`
     );
 
-    if (doc.mystery) this.openMystery();
+    // hmm: so reabre escolha se ainda nao decidiu o destino do protocolo
+    if (doc.typeId === "hmm") {
+      const decided =
+        this.progress.mindArchive || this.progress.pendingDeadTurn;
+      if (!decided) this.openMystery(HMM_REPORT, { choices: true });
+    } else if (doc.mystery) {
+      this.openMystery();
+    }
     if (customer.isFusion) s.score += 25;
     if (doc.marked && s.activeEvent?.id === "inspection") {
       s.score += 120;
@@ -1355,8 +1389,11 @@ export class Game {
         let wrongZone = false;
         if (cab && s.world.level.features.tree && cab.zoneType) {
           if (cab.zoneType === doc.typeId) {
-            s.score += 20;
-            msg = `Categoria correta (${doc.label})! +20`;
+            const smart = this.progress.upgrades.has("smart_file") ? 10 : 0;
+            s.score += 20 + smart;
+            msg = smart
+              ? `Categoria correta (${doc.label})! +${20 + smart}`
+              : `Categoria correta (${doc.label})! +20`;
             if (s.categoryTree) {
               const leaf = s.categoryTree
                 .find(doc.typeId)
@@ -1398,7 +1435,9 @@ export class Game {
       this.toast("Documento… estranho.");
       if (doc.typeId === "hmm") {
         s.score += 40;
-        this.openMystery(HMM_REPORT, { choices: true });
+        const decided =
+          this.progress.mindArchive || this.progress.pendingDeadTurn;
+        if (!decided) this.openMystery(HMM_REPORT, { choices: true });
       }
     } else if (s.hellMode) {
       const i = s.hellThoughtI ?? 0;
@@ -1574,6 +1613,10 @@ export class Game {
       return;
     }
     const src = s.player.hold[s.player.hold.length - 1];
+    if (src.typeId === "hmm" || src.typeId === "gun" || src.gun) {
+      this.toast("Isso nao pode ser fotocopiado.");
+      return;
+    }
     const copy = s.world.makeDoc(src.typeId, {
       estado: src.estado,
       setor: src.setor,
@@ -1694,24 +1737,52 @@ export class Game {
       return;
     }
     const cab = cabinetAt(s.world, tx, ty);
-    if (!cab) return;
-    const front = s.queue.peek();
-    if (!front) {
+    const box = boxAt(s.world, tx, ty);
+    const target = cab || box;
+    if (!target?.stack) {
+      this.toast("Olhe para um armário ou caixa.");
+      return;
+    }
+    if (s.queue.empty) {
       this.toast("Sem pedido na fila para priorizar.");
       return;
     }
-    const ok = cab.stack.promote((d) => docMatchesWant(d, front.want, front.wantParts));
-    if (ok) {
+
+    // 1) entregas agora (nao fusao)  2) so depois pecas/resultado de fusao
+    const wants = collectQueueWants(s.queue.items);
+    const ordered = [
+      ...wants.filter((w) => !w.fusion && !w.fusionPart),
+      ...wants.filter((w) => w.fusion || w.fusionPart),
+    ];
+
+    let promotedLabel = null;
+    for (const w of ordered) {
+      const ok = target.stack.promote((d) =>
+        docMatchesWant(d, w.want, w.wantParts)
+      );
+      if (ok) {
+        const type = DOC_TYPES.find((t) => t.id === w.want);
+        promotedLabel =
+          w.fusionPart
+            ? type?.name || type?.label || w.want
+            : s.queue.items.find((c) => c.want === w.want && !c.isFusion)?.wantLabel ||
+              s.queue.items.find((c) => c.want === w.want)?.wantLabel ||
+              type?.label ||
+              w.want;
+        break;
+      }
+    }
+
+    if (promotedLabel) {
       const cost = this.progress.upgrades.has("auto_labels") ? 0.15 : 0.45;
-      // small time tax
       s.timeLeft = Math.max(0, s.timeLeft - cost);
       sfx("paper");
-      cab.highlight = Math.max(cab.highlight, 0.55);
-      this.toast(`${front.wantLabel} promovido ao topo.`);
+      target.highlight = Math.max(target.highlight || 0, 0.55);
+      this.toast(`${promotedLabel} promovido ao topo.`);
       this.updatePathHint();
     } else {
       sfx("fail");
-      this.toast("Esse armário não tem o que a fila pede.");
+      this.toast("Essa pilha nao tem o que a fila pede.");
     }
   }
 
@@ -1907,8 +1978,8 @@ export class Game {
     if (s.timeLeft > 15) return;
 
     const box = spawnHmmBox(s.world);
-    s.hmmSpawned = true;
     if (box) {
+      s.hmmSpawned = true;
       sfx("mystery");
       this.toast("Uma caixa estranha surgiu no arquivo…");
       this.banner("DOCUMENTO CLASSIFICADO DETECTADO");
@@ -1929,8 +2000,8 @@ export class Game {
       return;
     }
     const box = spawnHmmBox(s.world);
-    s.hmmSpawned = true;
     if (box) {
+      s.hmmSpawned = true;
       sfx("mystery");
       this.toast("ADMIN · caixa forçada.");
       this.banner("DOCUMENTO CLASSIFICADO DETECTADO");
@@ -1949,7 +2020,9 @@ export class Game {
     this._hellThoughtDone = true;
     this._hellGunDone = true;
     this._hellEndDone = true;
+    clearInputBuffers();
     document.body.classList.remove("dead-aura", "hell-mode");
+    this.ui.hideMystery?.();
     this.ui.deadTaunt(null);
     this.ui.clearHellFeeds();
     this.ui.setPrompt(null);
@@ -1989,6 +2062,7 @@ export class Game {
       return;
     }
     this.progress.pendingDeadTurn = false;
+    this.progress.pendingHellTurn = false;
     this.progress.afterDeadHell = true;
     this.progress.unlocked = Math.max(this.progress.unlocked, 5);
     persist(this.progress);
@@ -2064,23 +2138,34 @@ export class Game {
     this._mysteryChoices = false;
     this.mode = "play";
     this.ui.hideMystery();
+    clearPressed();
   }
 
   endLevel(opts = {}) {
     const s = this.state;
     if (s.finished) return;
     s.finished = true;
+    this.ui.hideMystery?.();
+    clearPressed();
     const trueEnd = !!(opts.trueEnd || s.hellTrueEnd);
     this._retrySpecial = s.deadAura ? "dead" : s.hellMode ? "hell" : null;
     this._endedAsDead = !!s.deadAura;
     if (s.deadAura) {
       this.progress.afterDeadHell = true;
+      this.progress.pendingHellTurn = true;
     }
     if (trueEnd) {
       this.progress.trueEnd = true;
+      this.progress.afterDeadHell = false;
+      this.progress.pendingHellTurn = false;
     }
     const level = s.world.level;
     const goal = s.deadAura ? s.deadGoal || DEAD_TURN_GOAL : level.goal;
+    // Bonus de meta antes da nota (nota/recorde usam score final)
+    if (!trueEnd && s.served >= goal) {
+      const over = s.served - goal;
+      s.score += 100 + over * 50;
+    }
     const result = gradeFor(
       s.score,
       goal,
@@ -2089,11 +2174,6 @@ export class Game {
       s.deadAura || trueEnd ? Math.max(0, level.duration * 0.2) : s.timeLeft,
       level.duration
     );
-    // bônus por meta + extras acima da meta
-    if (!trueEnd && s.served >= goal) {
-      const over = s.served - goal;
-      s.score += 100 + over * 50;
-    }
 
     const diffId = level.difficulty || this.progress.difficulty || "normal";
     if (!trueEnd) {
@@ -2110,7 +2190,9 @@ export class Game {
         if (!this.progress.upgrades.has(uidUp)) {
           this.progress.upgrades.add(uidUp);
           const u = UPGRADES[uidUp];
-          unlockMsg = (unlockMsg ? unlockMsg + " · " : "") + `Melhoria: ${u.name}`;
+          if (u) {
+            unlockMsg = (unlockMsg ? unlockMsg + " · " : "") + `Melhoria: ${u.name}`;
+          }
         }
       }
     }
@@ -2122,12 +2204,13 @@ export class Game {
       return;
     }
 
-    // Final falso: arquivou o relatório na mente e terminou o turno 5 normal
+    // Final "normal": turno 5 normal com meta, sem caminho morto/inferno
     const falseEnd =
       !s.deadAura &&
       !s.hellMode &&
-      level.id === 5 &&
-      !!this.progress.mindArchive &&
+      Number(level.id) === 5 &&
+      !this.progress.pendingDeadTurn &&
+      !this.progress.pendingHellTurn &&
       s.served >= goal;
     if (falseEnd) {
       this.openFalseEnding();
@@ -2167,21 +2250,23 @@ export class Game {
     return d;
   }
 
-  /** Final “bom” / falso — arquivou o hmm mentalmente. */
+  /** Final "normal" — concluiu o turno 5 sem escolher "I…Inutil?". */
   openFalseEnding() {
     this.state = null;
     this._mysteryChoices = false;
+    this.mode = "false-end";
+    clearInputBuffers();
     document.body.classList.remove("dead-aura", "hell-mode", "epilogue-mode");
     this.ui.showDeadTransition(false);
+    this.ui.hideMystery?.();
     this.ui.deadTaunt(null);
     this.ui.clearHellFeeds();
     this.ui.hideTurnIntro?.();
     this.ui.setPrompt(null);
     this.ui.toast(null);
     this.ui.banner(null);
-    this.ui.showHud(false);
     this.ui.showPause(false);
-    this.mode = "false-end";
+    this.ui.showHud(false);
     setAmbience(null);
     sfx("falseEnd");
     this.ui.showFalseEnding();
@@ -2221,10 +2306,12 @@ export class Game {
     this._deadOutroDone = true;
     this._endedAsDead = false;
     this._retrySpecial = null;
+    clearInputBuffers();
     setAmbience(null);
     document.body.classList.remove("dead-aura", "hell-mode", "epilogue-mode", "false-end-mode");
     this.ui.hideEpilogue?.();
     this.ui.hideFalseEnding?.();
+    this.ui.hideMystery?.();
     this.ui.showDeadTransition(false);
     this.ui.deadTaunt(null);
     this.ui.clearHellFeeds();

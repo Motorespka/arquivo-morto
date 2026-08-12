@@ -37,8 +37,19 @@ export function tapVirtualKey(action) {
   pressed.add(action);
 }
 
+/** Descarta taps/teclas bufferizadas (evita pause/E no primeiro frame). */
+export function clearPressed() {
+  pressed.clear();
+}
+
 export function clearVirtualKeys() {
   for (const a of HOLD_ACTIONS) keys.delete(a);
+}
+
+export function clearInputBuffers() {
+  pressed.clear();
+  keys.clear();
+  cheatBuf = "";
 }
 
 export function bindInput() {

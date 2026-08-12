@@ -1,0 +1,21 @@
+{
+  "name": "Arquivo Morto",
+  "short_name": "Arquivo Morto",
+  "description": "Jogo gratis de burocracia caotica no Setor 404.",
+  "start_url": "./play.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0e0c0a",
+  "theme_color": "#1a1410",
+  "lang": "pt-BR",
+  "orientation": "any",
+  "categories": ["games", "entertainment"],
+  "icons": [
+    {
+      "src": "assets/share/og-cover.png",
+      "sizes": "1376x768",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

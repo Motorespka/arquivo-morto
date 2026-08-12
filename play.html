@@ -3,19 +3,32 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Arquivo Morto</title>
-  <meta name="description" content="Jogue Arquivo Morto no navegador ou no celular: burocracia caotica no Setor 404." />
-  <meta name="robots" content="index, follow" />
+  <title>Jogar Arquivo Morto | Setor 404</title>
+  <meta name="description" content="Jogue Arquivo Morto agora: burocracia caotica no Setor 404, no PC ou no celular." />
+  <meta name="keywords" content="jogar Arquivo Morto, jogo cartorio, Setor 404, jogo gratis navegador" />
+  <meta name="author" content="Christian de Almeida Borges" />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
   <meta name="theme-color" content="#0e0c0a" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <link rel="canonical" href="https://motorespka.github.io/arquivo-morto/play.html" />
+  <link rel="manifest" href="site.webmanifest" />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="pt_BR" />
+  <meta property="og:title" content="Jogar Arquivo Morto" />
+  <meta property="og:description" content="O expediente comecou. Atenda a fila do Setor 404." />
+  <meta property="og:url" content="https://motorespka.github.io/arquivo-morto/play.html" />
+  <meta property="og:image" content="https://motorespka.github.io/arquivo-morto/assets/share/og-cover.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Jogar Arquivo Morto" />
+  <meta name="twitter:description" content="Jogo gratis no navegador e no celular." />
+  <meta name="twitter:image" content="https://motorespka.github.io/arquivo-morto/assets/share/og-cover.png" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%231a1410'/%3E%3Crect x='10' y='14' width='44' height='40' fill='%23d4a84a'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='18' font-family='monospace' fill='%237a1810'%3E404%3C/text%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Special+Elite&family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=20260809c" />
+  <link rel="stylesheet" href="css/style.css?v=20260812a" />
 </head>
 <body>
   <div id="app">
@@ -147,31 +160,35 @@
     <!-- HUD -->
     <div id="hud" class="hidden">
       <header class="hud-bar" aria-label="Status do turno">
-        <div class="hud-block">
-          <span class="k">Dia</span>
-          <strong id="hud-level">1</strong>
+        <div class="hud-rail hud-rail-left">
+          <div class="hud-block">
+            <span class="k">Dia</span>
+            <strong id="hud-level">1</strong>
+          </div>
+          <div class="hud-block timer-block">
+            <span class="k">Tempo</span>
+            <strong id="hud-timer">2:00</strong>
+          </div>
+          <div class="hud-block">
+            <span class="k">Meta</span>
+            <strong id="hud-served">0/0</strong>
+          </div>
+          <div class="hud-block">
+            <span class="k">Pontos</span>
+            <strong id="hud-score">0</strong>
+          </div>
         </div>
-        <div class="hud-block timer-block">
-          <span class="k">Tempo</span>
-          <strong id="hud-timer">2:00</strong>
+        <div class="hud-rail hud-rail-right">
+          <div class="hud-block hud-diff-block">
+            <span class="k">Modo</span>
+            <strong id="hud-diff">Normal</strong>
+          </div>
+          <div class="hud-block hold-block">
+            <span class="k">Na mão</span>
+            <strong id="hud-hold">vazio</strong>
+          </div>
+          <button id="btn-mute-hud" class="btn-mute-hud" type="button" title="Som" aria-pressed="false">Som</button>
         </div>
-        <div class="hud-block">
-          <span class="k">Meta</span>
-          <strong id="hud-served">0/0</strong>
-        </div>
-        <div class="hud-block">
-          <span class="k">Pontos</span>
-          <strong id="hud-score">0</strong>
-        </div>
-        <div class="hud-block hud-diff-block">
-          <span class="k">Modo</span>
-          <strong id="hud-diff">Normal</strong>
-        </div>
-        <div class="hud-block hold-block">
-          <span class="k">Na mão</span>
-          <strong id="hud-hold">vazio</strong>
-        </div>
-        <button id="btn-mute-hud" class="btn-mute-hud" type="button" title="Som" aria-pressed="false">Som</button>
       </header>
 
       <aside id="queue-panel" class="mini-hud left-hud">
@@ -258,7 +275,7 @@
       </div>
     </section>
 
-    <!-- FINAL FALSO (arquivou o relatório na mente) -->
+    <!-- FINAL NORMAL (turno 5 sem "I…Inutil?") -->
     <section id="screen-false-end" class="screen screen-false-end hidden" aria-label="Final normal">
       <div class="false-end-glow" aria-hidden="true"></div>
       <div class="false-end-scraps" aria-hidden="true">
@@ -413,6 +430,6 @@
       if (landscape) document.documentElement.classList.add("touch-landscape");
     })();
   </script>
-  <script type="module" src="js/main.js?v=20260809c"></script>
+  <script type="module" src="js/main.js?v=20260812a"></script>
 </body>
 </html>

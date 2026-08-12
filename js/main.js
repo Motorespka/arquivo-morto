@@ -230,7 +230,6 @@ const ui = {
   },
   _touchChromePx() {
     if (!this._isTouchPlay()) return 0;
-    if (this._isLandscapeNow()) return 0;
     const tc = $("touch-controls");
     if (!tc || tc.classList.contains("hidden")) return 0;
     const h = tc.getBoundingClientRect().height;
@@ -239,26 +238,40 @@ const ui = {
     const n = parseFloat(css);
     return Number.isFinite(n) ? Math.ceil(n) : 188;
   },
-  /** Espaco reservado aos controles (embaixo no vertical, laterais no deitado). */
+  /** Espaco reservado: HUD nas laterais + controles embaixo (pe e deitado iguais). */
   _touchInsets() {
     if (!this._isTouchPlay()) return { top: 0, right: 0, bottom: 0, left: 0 };
     const tc = $("touch-controls");
-    if (!tc || tc.classList.contains("hidden")) {
+    const hudOn = !$("hud")?.classList.contains("hidden");
+    if ((!tc || tc.classList.contains("hidden")) && !hudOn) {
       return { top: 0, right: 0, bottom: 0, left: 0 };
     }
-    if (this._isLandscapeNow()) {
-      const cssL = getComputedStyle(document.documentElement).getPropertyValue("--touch-side-left");
-      const cssR = getComputedStyle(document.documentElement).getPropertyValue("--touch-side-right");
-      const left = parseFloat(cssL);
-      const right = parseFloat(cssR);
-      return {
-        top: 0,
-        bottom: 0,
-        left: Number.isFinite(left) ? Math.ceil(left) : 168,
-        right: Number.isFinite(right) ? Math.ceil(right) : 188,
-      };
+    const cssNum = (name, fallback) => {
+      const n = parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue(name)
+      );
+      return Number.isFinite(n) ? Math.ceil(n) : fallback;
+    };
+    let insetL = 0;
+    let insetR = 0;
+    try {
+      const probe = document.createElement("div");
+      probe.style.cssText =
+        "position:fixed;left:0;top:0;width:0;padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px);visibility:hidden;pointer-events:none";
+      document.body.appendChild(probe);
+      const cs = getComputedStyle(probe);
+      insetL = Math.ceil(parseFloat(cs.paddingLeft) || 0);
+      insetR = Math.ceil(parseFloat(cs.paddingRight) || 0);
+      probe.remove();
+    } catch {
+      /* ignore */
     }
-    return { top: 0, right: 0, bottom: this._touchChromePx(), left: 0 };
+    return {
+      top: 0,
+      bottom: this._touchChromePx(),
+      left: (hudOn ? cssNum("--hud-rail-left", 86) : 0) + insetL,
+      right: (hudOn ? cssNum("--hud-rail-right", 100) : 0) + insetR,
+    };
   },
   syncLandscapeUi() {
     const root = document.documentElement;
@@ -584,11 +597,23 @@ const ui = {
     this.hideScreens();
     this.showHud(false);
     this.showPause(false);
+    this.hideMystery?.();
+    this.hideTurnIntro?.();
+    this.showDeadTransition?.(false);
     this.deadTaunt(null);
     this.clearHellFeeds();
+    this._hidePageLeaf?.();
     document.body.classList.add("false-end-mode");
     document.body.classList.remove("epilogue-mode", "dead-aura", "hell-mode");
-    $("screen-false-end").classList.remove("hidden");
+    const screen = $("screen-false-end");
+    if (screen) {
+      screen.classList.remove("hidden");
+      screen.style.visibility = "";
+      screen.style.pointerEvents = "";
+      screen.scrollTop = 0;
+    }
+    const label = $("false-end-normal");
+    if (label) label.textContent = "normal";
     this.startFalseEndGlitch();
   },
   hideFalseEnding() {
@@ -736,8 +761,12 @@ const ui = {
   updateHud(state, level) {
     $("hud-level").textContent = String(level.id);
     const timerEl = $("hud-timer");
-    const goal = state.deadAura ? state.deadGoal || 10 : level.goal;
-    $("hud-served").textContent = `${state.served}/${goal}`;
+    if (state.hellMode) {
+      $("hud-served").textContent = `${state.served}/∞`;
+    } else {
+      const goal = state.deadAura ? state.deadGoal || 10 : level.goal;
+      $("hud-served").textContent = `${state.served}/${goal}`;
+    }
     const scoreEl = $("hud-score");
     scoreEl.textContent = String(state.score);
     if (state.scorePulse > 0.2) scoreEl.classList.add("score-pop");
@@ -934,7 +963,8 @@ const ui = {
   },
   showResults(r) {
     this.hideScreens();
-    document.body.classList.remove("epilogue-mode");
+    this.hideMystery?.();
+    document.body.classList.remove("epilogue-mode", "false-end-mode");
     $("screen-results").classList.remove("hidden");
     const eyebrow = $("results-eyebrow");
     if (eyebrow) {
@@ -1191,7 +1221,8 @@ function boot() {
     else if (game.mode === "hell-ending") game.advanceHellEnding();
   });
   window.addEventListener("keydown", (e) => {
-    if (e.code !== "Space" && e.code !== "Enter" && e.code !== "KeyE") return;
+    // E tambem chega via pollInput nas cutscenes — evite avanço duplo
+    if (e.code !== "Space" && e.code !== "Enter") return;
     if (game.mode === "turn-intro") {
       e.preventDefault();
       game.advanceTurnIntro();

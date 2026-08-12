@@ -6,3 +6,7 @@ node_modules/
 recados pro prabo.txt
 .env
 .env.*
+release/
+dist/
+*.exe
+!build/icon.ico
